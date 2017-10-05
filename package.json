@@ -1,0 +1,45 @@
+{
+  "author": "code@virtualpatterns.com",
+  "description": "TBD",
+  "license": "ISC",
+  "main": "server/index.js",
+  "name": "porto",
+  "scripts": {
+    "link": "hln ./process/logs \"$HOME/Library/Logs/porto\"",
+    "unlink": "hln -u \"$HOME/Library/Logs/porto\"",
+    "upgrade": "npm-check-updates --upgrade",
+    "clean": "rm -rf ./coverage ./library ./server ./www",
+    "build": "npm run clean && babel ./source --copy-files --out-dir . && webpack",
+    "run": "npm run build && node server/index.js run --databaseUrl mysql://porto:porto@DUMBLEDORE.local/porto --logPath ./process/logs/porto.log",
+    "debug": "npm run build && node --inspect server/index.js run --databaseUrl mysql://porto:porto@DUMBLEDORE.local/porto?debug=true --logPath ./process/logs/porto.log",
+    "check": "depcheck --ignore-dirs=source,sandbox",
+    "get-attendance": "http GET http://localhost:8080/api/attendance",
+    "put-attendance": "http PUT http://localhost:8080/api/attendance meetingId=14 userId=6 attended:=true"
+  },
+  "version": "0.0.1",
+  "dependencies": {
+    "@pwn/is": "^1.0.2",
+    "axios": "^0.16.2",
+    "commander": "^2.11.0",
+    "es6-promisify": "^5.0.0",
+    "mablung": "0.0.10",
+    "moment": "^2.18.1",
+    "mysql": "^2.14.1",
+    "restify": "^6.0.1",
+    "restify-errors": "^5.0.0",
+    "restify-plugins": "^1.6.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "depcheck": "^0.6.7",
+    "nessa": "0.0.23",
+    "npm-check-updates": "^2.12.1",
+    "webpack": "^3.6.0"
+  }
+}

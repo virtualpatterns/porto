@@ -1,0 +1,15 @@
+.attendance
+  if !Is.emptyObject(attendance)
+    .meeting= attendance.meetingDescription
+    ul.attendees
+      each attendee in attendance.attendees
+        li.attendee
+          input(checked=attendee.attended
+                id=attendee.userId
+                type='checkbox'
+                data-meeting-id=attendance.meetingId
+                data-user-id=attendee.userId)
+          label(for=attendee.userId)
+            = attendee.userName
+  else
+    p No attendance data ...

@@ -1,0 +1,5 @@
+@import './reset.css';
+
+ul.attendees {
+  width: 300px
+}

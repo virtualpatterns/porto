@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    "add-module-exports",
+    "nessa/library/transpiler",
+    "transform-async-to-generator"
+  ],
+  "presets": [
+    "es2015",
+    "stage-0"
+  ]
+}
