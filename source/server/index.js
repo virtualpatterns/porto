@@ -8,6 +8,7 @@ import Server from './server'
 const ADDRESS = '0.0.0.0'
 const DATABASE_URL = 'mysql://localhost/porto'
 const LOG_PATH = Path.join(Process.cwd(), `${Package.name}.log`)
+const MODULES_PATH = Path.join(__dirname, '../node_modules')
 const PORT = 8080
 const STATIC_PATH = Path.join(__dirname, '../www')
 
@@ -19,9 +20,10 @@ Command
   .description('Run the server')
   .option('--address <address>', `Listening IPv4 or IPv6 address, defaults to ${ADDRESS}`)
   .option('--databaseUrl <url>', `Database URL, defaults to ${DATABASE_URL}`)
+  .option('--logPath <path>', `Log file path, defaults to ${Path.trim(LOG_PATH)}`)
+  .option('--modulesPath <path>', `Modules path, defaults to ${Path.trim(MODULES_PATH)}`)
   .option('--port <number>', `Listening port, defaults to ${PORT}`)
   .option('--staticPath <path>', `Static file path, defaults to ${Path.trim(STATIC_PATH)}`)
-  .option('--logPath <path>', `Log file path, defaults to ${Path.trim(LOG_PATH)}`)
   .action(async (options) => {
 
     Log.addConsole()
@@ -67,7 +69,11 @@ Command
 
       })
 
-      await Server.start(options.address || ADDRESS, options.port || PORT, options.staticPath || STATIC_PATH, options.databaseUrl || DATABASE_URL)
+      await Server.start( options.address || ADDRESS,
+                          options.port || PORT,
+                          options.staticPath || STATIC_PATH,
+                          options.modulesPath || MODULES_PATH,
+                          options.databaseUrl || DATABASE_URL)
 
     }
     catch (error) {

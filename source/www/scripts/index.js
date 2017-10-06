@@ -2,6 +2,7 @@ import CreateContent from 'virtual-dom/create-element'
 import Diff from 'virtual-dom/diff'
 import Is from '@pwn/is'
 import { Log } from 'mablung'
+// import { MDCCheckbox as Checkbox } from 'mdc-checkbox'
 import Patch from 'virtual-dom/patch'
 import Request from 'axios'
 
@@ -37,7 +38,14 @@ async function onLoaded() {
     })
 
     document.querySelector('#index').appendChild(CreateContent(virtualContent))
-    document.querySelectorAll('li.attendee > input').forEach(element => element.addEventListener('change', onChange))
+
+    document.querySelectorAll('li.attendee div.mdc-checkbox').forEach(element => {
+      mdc.checkbox.MDCCheckbox.attachTo(element)
+    })
+
+    document.querySelectorAll('li.attendee input').forEach(element => {
+      element.addEventListener('change', onChange)
+    })
 
   // }
   // catch (error) {

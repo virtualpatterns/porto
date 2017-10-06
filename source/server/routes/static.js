@@ -3,10 +3,11 @@ import RESTPlugins from 'restify-plugins'
 
 const Static = Object.create({})
 
-const REGEXP_MOCHA = /^\/www\/vendor\/mocha\/(.*)$/
+const REGEXP_MATERIAL = /^\/www\/vendor\/material\/(.*)$/
+// const REGEXP_MOCHA = /^\/www\/vendor\/mocha\/(.*)$/
 const REGEXP_STATIC = /^\/www\/(.*)$/
 
-Static.createRoutes = function(server, staticPath) {
+Static.createRoutes = function(server, staticPath, modulesPath) {
 
   server.head('/favicon.ico', (request, response, next) => {
     response.send(200)
@@ -51,6 +52,19 @@ Static.createRoutes = function(server, staticPath) {
   //     'maxAge': 0
   //   })(request, response, next)
   // })
+
+  server.head(REGEXP_MATERIAL, (request, response, next) => {
+    response.send(200)
+    next()
+  })
+
+  server.get(REGEXP_MATERIAL, (request, response, next) => {
+    RESTPlugins.serveStatic({
+      'directory': Path.join(modulesPath, '@material'),
+      'file': request.params[0],
+      'maxAge': 0
+    })(request, response, next)
+  })
 
   server.head(REGEXP_STATIC, (request, response, next) => {
     response.send(200)

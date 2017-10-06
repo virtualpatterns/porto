@@ -4,12 +4,31 @@
     ul.attendees
       each attendee in attendance.attendees
         li.attendee
-          input(checked=attendee.attended
-                id=attendee.userId
-                type='checkbox'
-                data-meeting-id=attendance.meetingId
-                data-user-id=attendee.userId)
-          label(for=attendee.userId)
-            = attendee.userName
+          .mdc-form-field
+
+            //- .mdc-checkbox
+            //-   input.mdc-checkbox__native-control( checked=attendee.attended
+            //-                                       id=attendee.userId
+            //-                                       type='checkbox'
+            //-                                       data-meeting-id=attendance.meetingId
+            //-                                       data-user-id=attendee.userId)
+            //-     
+            //-   .mdc-checkbox__background
+            //-     svg.mdc-checkbox__checkmark(viewBox='0 0 24 24')
+            //-       path.mdc-checkbox__checkmark__path( d='M1.73,12.91 8.1,19.28 22.79,4.59'
+            //-                                           fill='none'
+            //-                                           stroke='white')
+            //-     .mdc-checkbox__mixedmark
+
+            .mdc-switch
+              input.mdc-switch__native-control( checked=attendee.attended
+                                                id=attendee.userId
+                                                type='checkbox'
+                                                data-meeting-id=attendance.meetingId
+                                                data-user-id=attendee.userId)
+              .mdc-switch__background
+                .mdc-switch__knob
+            label(for=attendee.userId)
+              = attendee.userName
   else
     p No attendance data ...

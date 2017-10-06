@@ -18,6 +18,12 @@
   },
   "version": "0.0.1",
   "dependencies": {
+    "@material/animation": "^0.4.1",
+    "@material/auto-init": "^0.2.0",
+    "@material/checkbox": "^0.4.8",
+    "@material/form-field": "^0.2.17",
+    "@material/switch": "^0.1.15",
+    "@material/typography": "^0.3.0",
     "@pwn/is": "^1.0.2",
     "axios": "^0.16.2",
     "commander": "^2.11.0",

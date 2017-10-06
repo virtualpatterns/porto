@@ -11,8 +11,8 @@ import Status from './routes/status'
 
 const Server = Object.create({})
 
-Server.start = async function (address, port, staticPath, databaseUrl) {
-  Log.debug(`- Server.start('${address}', ${port}, '${Path.trim(staticPath)}', '${databaseUrl}')`)
+Server.start = async function (address, port, staticPath, modulesPath, databaseUrl) {
+  Log.debug(`- Server.start('${address}', ${port}, '${Path.trim(staticPath)}', '${Path.trim(modulesPath)}', '${databaseUrl}')`)
 
   return new Promise((resolve, reject) => {
 
@@ -48,7 +48,7 @@ Server.start = async function (address, port, staticPath, databaseUrl) {
       })
 
       Attendance.createRoutes(this.server, databaseUrl)
-      Static.createRoutes(this.server, staticPath)
+      Static.createRoutes(this.server, staticPath, modulesPath)
       Status.createRoutes(this.server)
 
       this.server.listen(port, address, () => {
