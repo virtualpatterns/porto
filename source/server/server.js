@@ -1,5 +1,5 @@
 import Is from '@pwn/is'
-import { Log, Path, Process } from 'mablung'
+import { Log, Path } from 'mablung'
 import RESTPlugins from 'restify-plugins'
 import REST from 'restify'
 import Utilities from 'util'

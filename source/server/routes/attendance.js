@@ -27,27 +27,27 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
       try {
 
-        let [rows, fields] = await connection.Promise.query('call getAttendance(null)')
-        let data = {}
+        // let [rows, fields] = await connection.Promise.query('call getAttendance(null, null)')
+        // let data = {}
+        //
+        // for (let row of rows) {
+        //
+        //   if (!data.meetingId) {
+        //     data.meetingId = row.meetingId
+        //     data.meetingOn = row.meetingOn
+        //     data.meetingDescription = `Meeting on ${Moment(row.meetingOn).format('dddd [the] Do')}`
+        //     data.attendees = []
+        //   }
+        //
+        //   data.attendees.push({
+        //     'userId': row.userId,
+        //     'userName': row.userName,
+        //     'attended': row.attended,
+        //   })
+        //
+        // }
 
-        for (let row of rows) {
-
-          if (!data.meetingId) {
-            data.meetingId = row.meetingId
-            data.meetingOn = row.meetingOn
-            data.meetingDescription = `Meeting on ${Moment(row.meetingOn).format('dddd [the] Do')}`
-            data.attendees = []
-          }
-
-          data.attendees.push({
-            'userId': row.userId,
-            'userName': row.userName,
-            'attended': row.attended,
-          })
-
-        }
-
-        response.send(200, data)
+        response.send(200, Attendance.toJSON(await connection.Promise.query('call getAttendance(null, null)')))
         return next()
 
       }
@@ -89,9 +89,32 @@ Attendance.createRoutes = function(server, databaseUrl) {
           request.body.attended
         ]
 
-        await connection.Promise.query(Database.format(statement, values))
+        // await connection.Promise.query(Database.format(statement, values))
+        //
+        // response.send(200)
+        // return next()
 
-        response.send(200)
+        // let [rows, fields] = await connection.Promise.query(Database.format(statement, values))
+        // let data = {}
+        //
+        // for (let row of rows) {
+        //
+        //   if (!data.meetingId) {
+        //     data.meetingId = row.meetingId
+        //     data.meetingOn = row.meetingOn
+        //     data.meetingDescription = `Meeting on ${Moment(row.meetingOn).format('dddd [the] Do')}`
+        //     data.attendees = []
+        //   }
+        //
+        //   data.attendees.push({
+        //     'userId': row.userId,
+        //     'userName': row.userName,
+        //     'attended': row.attended,
+        //   })
+        //
+        // }
+
+        response.send(200, Attendance.toJSON(await connection.Promise.query(Database.format(statement, values))))
         return next()
 
       }
@@ -112,6 +135,31 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
   })
 
+}
+
+Attendance.toJSON = function(results) {
+
+  let [rows, fields] = results
+  let data = {}
+
+  for (let row of rows) {
+
+    if (!data.meetingId) {
+      data.meetingId = row.meetingId
+      data.meetingOn = row.meetingOn
+      data.meetingDescription = `${Moment(row.meetingOn).format('ddd MMM D')}`
+      data.attendees = []
+    }
+
+    data.attendees.push({
+      'userId': row.userId,
+      'userName': row.userName,
+      'attended': row.attended,
+    })
+
+  }
+
+  return data
 
 }
 

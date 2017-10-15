@@ -1,34 +1,43 @@
 .attendance
   if !Is.emptyObject(attendance)
-    .meeting= attendance.meetingDescription
-    ul.attendees
+
+    header.mdc-toolbar.mdc-toolbar--fixed
+      div.mdc-toolbar__row
+        section.mdc-toolbar__section.mdc-toolbar__section--align-start
+          span.mdc-toolbar__title
+            = attendance.meetingDescription
+        section.mdc-toolbar__section.mdc-toolbar__section--align-end
+          a#refresh.material-icons.mdc-toolbar__icon--menu(href='#') 
+            | refresh
+            
+      //- div.mdc-toolbar__row
+      //-   div#progress.mdc-linear-progress.mdc-linear-progress--indeterminate
+      //-     div.mdc-linear-progress__buffering-dots
+      //-     div.mdc-linear-progress__buffer
+      //-     div.mdc-linear-progress__bar.mdc-linear-progress__primary-bar
+      //-       span.mdc-linear-progress__bar-inner
+      //-     div.mdc-linear-progress__bar.mdc-linear-progress__secondary-bar
+      //-       span.mdc-linear-progress__bar-inner
+                    
+    ul.attendees.mdc-toolbar-fixed-adjust.mdc-list
       each attendee in attendance.attendees
-        li.attendee
-          .mdc-form-field
+        li.attendee.mdc-list-item
+          span.mdc-list-item__text
+            = attendee.userName
+            //- span.mdc-list-item__text__secondary
+            //-   span(style='font-weight: bold')
+            //-     if attendee.attended
+            //-       | is
+            //-     else
+            //-       | is not
+            //-   |  attending
+          a.attendee.mdc-list-item__end-detail.material-icons(data-meeting-id=attendance.meetingId
+                                                              data-user-id=attendee.userId
+                                                              data-attended=attendee.attended)
+            if attendee.attended
+              | check_box
+            else
+              | check_box_outline_blank
 
-            //- .mdc-checkbox
-            //-   input.mdc-checkbox__native-control( checked=attendee.attended
-            //-                                       id=attendee.userId
-            //-                                       type='checkbox'
-            //-                                       data-meeting-id=attendance.meetingId
-            //-                                       data-user-id=attendee.userId)
-            //-     
-            //-   .mdc-checkbox__background
-            //-     svg.mdc-checkbox__checkmark(viewBox='0 0 24 24')
-            //-       path.mdc-checkbox__checkmark__path( d='M1.73,12.91 8.1,19.28 22.79,4.59'
-            //-                                           fill='none'
-            //-                                           stroke='white')
-            //-     .mdc-checkbox__mixedmark
-
-            .mdc-switch
-              input.mdc-switch__native-control( checked=attendee.attended
-                                                id=attendee.userId
-                                                type='checkbox'
-                                                data-meeting-id=attendance.meetingId
-                                                data-user-id=attendee.userId)
-              .mdc-switch__background
-                .mdc-switch__knob
-            label(for=attendee.userId)
-              = attendee.userName
   else
     p No attendance data ...
