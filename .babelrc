@@ -1,8 +1,15 @@
 {
   "plugins": [
     "add-module-exports",
-    "nessa/library/transpiler",
-    "transform-async-to-generator"
+    "transform-async-to-generator",
+    [
+      "nessa/library/transpiler",
+      {
+        "require": {
+          "utilities": "./library/utilities"
+        }
+      }
+    ]
   ],
   "presets": [
     "es2015",

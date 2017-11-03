@@ -2,7 +2,6 @@ import Is from '@pwn/is'
 import { Log, Path } from 'mablung'
 import RESTPlugins from 'restify-plugins'
 import REST from 'restify'
-import Utilities from 'util'
 
 import Attendance from './routes/attendance'
 import Package from '../package.json'
@@ -42,8 +41,8 @@ Server.start = async function (address, port, staticPath, modulesPath, databaseU
 
       this.server.use((request, response, next) => {
         Log.debug(`- ${request.method} ${request.url}`)
-        if (request.query && !Is.emptyObject(request.query)) Log.debug(`-   request.query ...\n\n${Utilities.inspect(request.query)}\n`)
-        if (request.body && !Is.emptyObject(request.body)) Log.debug(`-   request.body ...\n\n${Utilities.inspect(request.body)}\n`)
+        if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
+        if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
         return next()
       })
 

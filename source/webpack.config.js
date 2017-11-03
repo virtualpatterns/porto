@@ -1,7 +1,7 @@
 import WebPack from 'webpack'
 
 module.exports = {
-  'devtool': 'source-map',
+  'devtool': 'eval-source-map',
   'entry': {
     'index': [
       'babel-polyfill',

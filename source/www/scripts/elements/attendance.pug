@@ -1,0 +1,31 @@
+.p-element.p-template.p-attendance(id=element.id) 
+  header.p-meeting.mdc-toolbar.mdc-toolbar--fixed
+    div.mdc-toolbar__row
+      section.mdc-toolbar__section.mdc-toolbar__section--align-start
+        span.mdc-toolbar__title
+          if !Is.null(element.attendance)
+            = element.attendance.meetingDescription
+        section.mdc-toolbar__section.mdc-toolbar__section--align-end
+          a.p-refresh.material-icons.mdc-toolbar__icon--menu(href='#') 
+            if Is.null(element.attendance)
+              | more_horiz
+            else
+              | refresh
+  ul.p-attendees.p-progress.mdc-toolbar-fixed-adjust.mdc-list
+    if !Is.null(element.attendance)
+      each attendee in element.attendance.attendees
+        li.p-attendee.mdc-list-item
+          span.mdc-list-item__text
+            = attendee.userName
+          a.p-attendee.mdc-list-item__end-detail.material-icons(data-attended=attendee.attended.toString()
+                                                                data-meeting-id=element.attendance.meetingId
+                                                                data-user-id=attendee.userId
+                                                                href='#')
+            case attendee.attended
+              when 0
+                | clear
+              when 1
+                | done
+              when 2
+                | more_horiz
+        li.mdc-list-divider

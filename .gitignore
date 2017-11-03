@@ -1,4 +1,6 @@
+.DS_Store
 *.bts
+/library
 /node_modules
 /process
 /sandbox
@@ -6,3 +8,4 @@
 /source/sandbox
 /www
 /webpack.config.js
+/webpack.config.js.map

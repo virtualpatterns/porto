@@ -1,0 +1,17 @@
+{
+  "exec": "npm run-script build",
+  "ext": "css html ico js json png pug svg",
+  "ignore": [
+    "./source/www/scripts/bundles"
+  ],
+  "ignoreRoot": [
+    ".git",
+    "node_modules"
+  ],
+  "on-change-only": true,
+  "quiet": false,
+  "verbose": false,
+  "watch": [
+    "./source/www"
+  ]
+}
