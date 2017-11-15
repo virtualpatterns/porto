@@ -22,6 +22,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
       connection.Promise = {}
       connection.Promise.connect = Promisify(connection.connect, connection)
       connection.Promise.query = Promisify(connection.query, connection)
+      connection.Promise.end = Promisify(connection.end, connection)
 
       await connection.Promise.connect()
 
@@ -52,7 +53,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
       }
       finally {
-        await connection.end()
+        await connection.Promise.end()
       }
 
     }
@@ -77,6 +78,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
       connection.Promise = {}
       connection.Promise.connect = Promisify(connection.connect, connection)
       connection.Promise.query = Promisify(connection.query, connection)
+      connection.Promise.end = Promisify(connection.end, connection)
 
       await connection.Promise.connect()
 
@@ -119,7 +121,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
       }
       finally {
-        await connection.end()
+        await connection.Promise.end()
       }
 
     }

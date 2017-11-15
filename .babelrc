@@ -9,6 +9,13 @@
           "utilities": "./library/utilities"
         }
       }
+    ],
+    [
+      "transform-runtime",
+      {
+        "polyfill": false,
+        "regenerator": true
+      }
     ]
   ],
   "presets": [

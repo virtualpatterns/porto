@@ -11,13 +11,14 @@
               | more_horiz
             else
               | refresh
-  ul.p-attendees.p-progress.mdc-toolbar-fixed-adjust.mdc-list
+  ul.p-attendees.mdc-toolbar-fixed-adjust.mdc-list
     if !Is.null(element.attendance)
       each attendee in element.attendance.attendees
         li.p-attendee.mdc-list-item
           span.mdc-list-item__text
             = attendee.userName
-          a.p-attendee.mdc-list-item__end-detail.material-icons(data-attended=attendee.attended.toString()
+          a.p-attendee.mdc-list-item__end-detail.material-icons(class=attendee.attended == 0 ? 'p-not-attended' : ( attendee.attended == 1 ? 'p-attended' : 'p-unknown-attended' )
+                                                                data-attended=attendee.attended.toString()
                                                                 data-meeting-id=element.attendance.meetingId
                                                                 data-user-id=attendee.userId
                                                                 href='#')

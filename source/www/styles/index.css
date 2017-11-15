@@ -20,6 +20,10 @@ a.p-attendee {
   text-decoration: none;
 }
 
+a.p-attendee.p-not-attended {
+  font-weight: inherit;
+}
+
 div.p-overlay {
   background-color: rgba(0,0,0,0.10);
   height: 100%;
