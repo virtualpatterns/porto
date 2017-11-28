@@ -4,42 +4,34 @@ import { Log } from 'mablung'
 import Moment from 'moment'
 import Promisify from 'es6-promisify'
 
-const Database = Object.create(_Database)
+const connectionPrototype = Object.create({})
 
-Database.open = async function(...parameters) {
-
-  this.connection = _Database.createConnection.apply(_Database, parameters)
-
-  this.connect = Promisify(this.connection.connect, this.connection)
-  this.query = Promisify(this.connection.query, this.connection)
-  this.end = Promisify(this.connection.end, this.connection)
-
-  await this.connect()
-
-}
-
-Database.existsUser = async function(name) {
-  let [ , rows ] = await this.query(Database.format('set @existsUser = existsUser(0, ?); select @existsUser as existsUser;', [ name ]))
+connectionPrototype.existsUser = async function(name) {
+  let [ , rows ] = await this.query(this._connection.format('set @existsUser = existsUser(0, ?); select @existsUser as existsUser;', [ name ]))
   return rows[0].existsUser
 }
 
-Database.insertUser = async function(name) {
-  let [ , , rows ] = await this.query(Database.format('set @userId = 0; call insertUser(@userId, ?); select @userId as userId;', [ name ]))
+connectionPrototype.insertUser = async function(name) {
+  let [ , , rows ] = await this.query(this._connection.format('set @userId = 0; call insertUser(@userId, ?); select @userId as userId;', [ name ]))
   return rows[0].userId
 }
 
-Database.updateUser = async function(userId, name) {
-  await this.query(Database.format('call updateUser(?, ?);', [ userId, name ]))
+connectionPrototype.updateUser = async function(userId, name) {
+  await this.query(this._connection.format('call updateUser(?, ?);', [ userId, name ]))
 }
 
-Database.deleteUser = async function(name) {
-  await this.query(Database.format('call deleteUser(?);', [ name ]))
+connectionPrototype.deleteUser = async function(name) {
+  await this.query(this._connection.format('call deleteUser(?);', [ name ]))
 }
 
-Database.nextMeetingOn = async function(weekOf) {
-  Log.debug(`- Database.nextMeetingOn('${weekOf.toDate()}') { ... }`)
+connectionPrototype.deleteAllUsers = async function() {
+  await this.query(this._connection.format('call deleteAllUsers();'))
+}
 
-  let [ , rows ] = await this.query(Database.format('set @nextMeetingOn = nextMeetingOn(?); select @nextMeetingOn as nextMeetingOn;', [ weekOf.toDate() ]))
+connectionPrototype.nextMeetingOn = async function(weekOf) {
+  Log.debug(`- this.nextMeetingOn('${weekOf.toDate()}') { ... }`)
+
+  let [ , rows ] = await this.query(this._connection.format('set @nextMeetingOn = nextMeetingOn(?); select @nextMeetingOn as nextMeetingOn;', [ weekOf.toDate() ]))
   // let nextMeetingOn = new Date(rows[0].nextMeetingOn)
   let nextMeetingOn = Moment(rows[0].nextMeetingOn)
 
@@ -50,35 +42,35 @@ Database.nextMeetingOn = async function(weekOf) {
 
 }
 
-Database.existsMeeting = async function(on) {
-  let [ , rows ] = await this.query(Database.format('set @existsMeeting = existsMeeting(0, ?); select @existsMeeting as existsMeeting;', [ on.toDate() ]))
+connectionPrototype.existsMeeting = async function(on) {
+  let [ , rows ] = await this.query(this._connection.format('set @existsMeeting = existsMeeting(0, ?); select @existsMeeting as existsMeeting;', [ on.toDate() ]))
   return rows[0].existsMeeting
 }
 
-Database.insertMeeting = async function(weekOf) {
-  let [ , , rows ] = await this.query(Database.format('set @meetingId = 0; call insertMeeting(@meetingId, ?); select @meetingId as meetingId;', [ weekOf.toDate() ]))
+connectionPrototype.insertMeeting = async function(weekOf) {
+  let [ , , rows ] = await this.query(this._connection.format('set @meetingId = 0; call insertMeeting(@meetingId, ?); select @meetingId as meetingId;', [ weekOf.toDate() ]))
   return rows[0].meetingId
 }
 
-Database.deleteMeeting = async function(weekOf) {
-  await this.query(Database.format('call deleteMeeting(?);', [ weekOf.toDate() ]))
+connectionPrototype.deleteMeeting = async function(weekOf) {
+  await this.query(this._connection.format('call deleteMeeting(?);', [ weekOf.toDate() ]))
 }
 
-Database.existsAttendance = async function(meetingId, userId) {
-  let [ , rows ] = await this.query(Database.format('set @existsAttendance = existsAttendance(0, ?, ?); select @existsAttendance as existsAttendance;', [ meetingId, userId ]))
+connectionPrototype.existsAttendance = async function(meetingId, userId) {
+  let [ , rows ] = await this.query(this._connection.format('set @existsAttendance = existsAttendance(0, ?, ?); select @existsAttendance as existsAttendance;', [ meetingId, userId ]))
   return rows[0].existsAttendance
 }
 
-Database.insertAttendance = async function(meetingId, userId, attended) {
-  let [ rows, fields ] = await this.query(Database.format('call insertAttendance(?, ?, ?);', [ meetingId, userId, attended ]))
+connectionPrototype.insertAttendance = async function(meetingId, userId, attended) {
+  let [ rows, fields ] = await this.query(this._connection.format('call insertAttendance(?, ?, ?);', [ meetingId, userId, attended ]))
   return rows
 }
 
-Database.deleteAttendance = async function(meetingId, userId) {
-  await this.query(Database.format('call deleteAttendance(?, ?);', [ meetingId, userId ]))
+connectionPrototype.deleteAttendance = async function(meetingId, userId) {
+  await this.query(this._connection.format('call deleteAttendance(?, ?);', [ meetingId, userId ]))
 }
 
-Database.getAttendance = async function(...parameters) {
+connectionPrototype.getAttendance = async function(...parameters) {
 
   let meetingId = null
   let weekOf = null
@@ -94,20 +86,56 @@ Database.getAttendance = async function(...parameters) {
     weekOf = null
   }
 
-  let [ rows, fields ] = await this.query(Database.format('call getAttendance(?, ?);', [ meetingId, weekOf ]))
+  let [ rows, fields ] = await this.query(this._connection.format('call getAttendance(?, ?);', [ meetingId, weekOf ]))
   return rows
 
 }
 
-Database.close = async function() {
+connectionPrototype.close = async function() {
 
-  await this.end()
+  await this._connection.end()
 
   this.connect = null
   this.query = null
   this.end = null
 
-  this.connection = null
+  this._connection = null
+
+}
+
+const Connection = Object.create({})
+
+Connection.createConnection = function(_connection, prototype = connectionPrototype) {
+
+  let connection = Object.create(prototype)
+
+  connection.connect = Promisify(_connection.connect, _connection)
+  connection.query = Promisify(_connection.query, _connection)
+  connection.end = Promisify(_connection.end, _connection)
+
+  connection._connection = _connection
+
+  return connection
+
+}
+
+Connection.isConnection = function(element) {
+  return connectionPrototype.isPrototypeOf(connection)
+}
+
+Connection.getConnectionPrototype = function() {
+  return connectionPrototype
+}
+
+const Database = Object.create({})
+
+Database.open = async function(...parameters) {
+
+  let connection = Connection.createConnection(_Database.createConnection.apply(_Database, parameters))
+
+  await connection.connect()
+
+  return connection
 
 }
 

@@ -1,5 +1,5 @@
 {
-  "exec": "npm run-script build",
+  "exec": "npm run-script bundle",
   "ext": "css html ico js json png pug svg",
   "ignore": [
     "./source/www/scripts/bundles"

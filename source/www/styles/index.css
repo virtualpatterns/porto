@@ -25,7 +25,7 @@ a.p-attendee.p-not-attended {
 }
 
 div.p-overlay {
-  background-color: rgba(0,0,0,0.10);
+  background-color: rgba(0,0,0,0);
   height: 100%;
   left: 0px;
   position: fixed;
@@ -36,4 +36,21 @@ div.p-overlay {
 
 div.p-overlay-hidden {
   display: none;
+}
+
+&:checked + label::before {
+    background-color: var(--color-primary);
+}
+
+&:checked + label::after {
+    display: block;
+    position: absolute;
+    top: 0.2rem;
+    left: 0.375rem;
+    width: 0.25rem;
+    height: 0.5rem;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    content: '';
 }

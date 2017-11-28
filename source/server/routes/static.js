@@ -40,19 +40,6 @@ Static.createRoutes = function(server, staticPath, modulesPath) {
     response.redirect('/www/index.html', next)
   })
 
-  // server.head(REGEXP_MOCHA, (request, response, next) => {
-  //   response.send(200)
-  //   next()
-  // })
-  //
-  // server.get(REGEXP_MOCHA, (request, response, next) => {
-  //   RESTPlugins.serveStatic({
-  //     'directory': Path.join(modulesPath, 'mocha'),
-  //     'file': request.params[0],
-  //     'maxAge': 0
-  //   })(request, response, next)
-  // })
-
   server.head(REGEXP_MATERIAL, (request, response, next) => {
     response.send(200)
     next()

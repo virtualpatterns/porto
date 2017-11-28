@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 5.7.17, for macos10.12 (x86_64)
 --
--- Host: PODMORE.local    Database: porto
+-- Host: DUMBLEDORE.local    Database: porto
 -- ------------------------------------------------------
--- Server version	5.7.20
+-- Server version	5.7.19
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,13 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `attendance`
+-- Table structure for table `attendance`
 --
 
-LOCK TABLES `attendance` WRITE;
-/*!40000 ALTER TABLE `attendance` DISABLE KEYS */;
-/*!40000 ALTER TABLE `attendance` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `attendance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `attendance` (
+  `attendanceId` int(11) NOT NULL AUTO_INCREMENT,
+  `meetingId` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `attended` tinyint(4) NOT NULL DEFAULT '0',
+  `inserted` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated` datetime DEFAULT CURRENT_TIMESTAMP,
+  `deleted` datetime DEFAULT NULL,
+  PRIMARY KEY (`attendanceId`),
+  KEY `attendanceUserId` (`userId`),
+  KEY `attendanceMeetingId` (`meetingId`),
+  KEY `attendanceExists` (`userId`,`meetingId`,`deleted`),
+  KEY `attendanceGet` (`userId`,`meetingId`,`attended`,`deleted`),
+  CONSTRAINT `attendanceMeetingId` FOREIGN KEY (`meetingId`) REFERENCES `meeting` (`meetingId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `attendanceUserId` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -63,13 +79,22 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Dumping data for table `meeting`
+-- Table structure for table `meeting`
 --
 
-LOCK TABLES `meeting` WRITE;
-/*!40000 ALTER TABLE `meeting` DISABLE KEYS */;
-/*!40000 ALTER TABLE `meeting` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `meeting`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `meeting` (
+  `meetingId` int(11) NOT NULL AUTO_INCREMENT,
+  `on` date NOT NULL,
+  `inserted` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted` datetime DEFAULT NULL,
+  PRIMARY KEY (`meetingId`),
+  KEY `meetingExists` (`on`,`deleted`,`meetingId`)
+) ENGINE=InnoDB AUTO_INCREMENT=411 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -108,14 +133,22 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Dumping data for table `user`
+-- Table structure for table `user`
 --
 
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (58,'Nikolaus, Susana','2017-11-13 00:28:27','2017-11-13 00:28:27',NULL),(71,'Ficnar','2017-11-13 23:20:06','2017-11-13 23:20:06',NULL);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user` (
+  `userId` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `inserted` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` datetime NOT NULL,
+  `deleted` datetime DEFAULT NULL,
+  PRIMARY KEY (`userId`),
+  KEY `userExists` (`userId`,`name`,`deleted`)
+) ENGINE=InnoDB AUTO_INCREMENT=623 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -154,14 +187,18 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Dumping data for table `weekday`
+-- Table structure for table `weekday`
 --
 
-LOCK TABLES `weekday` WRITE;
-/*!40000 ALTER TABLE `weekday` DISABLE KEYS */;
-INSERT INTO `weekday` VALUES (0,2),(1,1),(2,0),(3,6),(4,5),(5,4),(6,3);
-/*!40000 ALTER TABLE `weekday` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `weekday`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `weekday` (
+  `from` int(11) NOT NULL,
+  `to` int(11) NOT NULL,
+  PRIMARY KEY (`from`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping events for database 'porto'
@@ -442,6 +479,38 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteAllUsers` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fficnar`@`%` PROCEDURE `deleteAllUsers`()
+BEGIN
+
+	update	attendance
+				inner join user on
+					attendance.userId = user.userId and
+					user.deleted is null
+    set		attendance.updated = now(),
+			attendance.deleted = now()
+	where	attendance.deleted is null;
+
+	update	user
+    set		user.updated = now(),
+			user.deleted = now()
+	where	user.deleted is null;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `deleteAttendance` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -569,7 +638,7 @@ BEGIN
             attendance.attendanceId,
 			ifnull(attendance.attended, 0)      as attended
     from    meeting
-                inner join user on
+                left outer join user on
                     user.deleted is null
                     left outer join attendance on
                         meeting.meetingId = attendance.meetingId and
@@ -742,4 +811,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-15  0:26:12
+-- Dump completed on 2017-11-26 23:47:13

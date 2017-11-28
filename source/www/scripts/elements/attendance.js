@@ -33,12 +33,12 @@ attendancePrototype.unbind = function() {
 attendancePrototype.onClicked = async function(event) {
   Log.debug('- attendancePrototype.onClicked(event) { ... }')
 
-  event.preventDefault()
-
   if (event.target.matches('a.p-refresh')) {
+    event.preventDefault()
     await this.onRefreshed()
   }
   else if (event.target.matches('a.p-attendee')) {
+    event.preventDefault()
     await this.onAttended(event)
   }
 

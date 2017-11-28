@@ -1,8 +1,9 @@
-import Database from 'mysql'
 import { Log } from 'mablung'
 import Moment from 'moment'
 import Promisify from 'es6-promisify'
 import RESTErrors from 'restify-errors'
+
+import Database from '../library/database'
 
 const Attendance = Object.create({})
 
@@ -17,43 +18,16 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
     try {
 
-      let connection = Database.createConnection(databaseUrl)
-
-      connection.Promise = {}
-      connection.Promise.connect = Promisify(connection.connect, connection)
-      connection.Promise.query = Promisify(connection.query, connection)
-      connection.Promise.end = Promisify(connection.end, connection)
-
-      await connection.Promise.connect()
+      let connection = await Database.open(databaseUrl)
 
       try {
 
-        // let [rows, fields] = await connection.Promise.query('call getAttendance(null, null)')
-        // let data = {}
-        //
-        // for (let row of rows) {
-        //
-        //   if (!data.meetingId) {
-        //     data.meetingId = row.meetingId
-        //     data.meetingOn = row.meetingOn
-        //     data.meetingDescription = `Meeting on ${Moment(row.meetingOn).format('dddd [the] Do')}`
-        //     data.attendees = []
-        //   }
-        //
-        //   data.attendees.push({
-        //     'userId': row.userId,
-        //     'userName': row.userName,
-        //     'attended': row.attended,
-        //   })
-        //
-        // }
-
-        response.send(200, Attendance.toJSON(await connection.Promise.query('call getAttendance(null, null)')))
+        response.send(200, Attendance.toJSON(await connection.getAttendance()))
         return next()
 
       }
       finally {
-        await connection.Promise.end()
+        await connection.close()
       }
 
     }
@@ -73,55 +47,16 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
     try {
 
-      let connection = Database.createConnection(databaseUrl)
-
-      connection.Promise = {}
-      connection.Promise.connect = Promisify(connection.connect, connection)
-      connection.Promise.query = Promisify(connection.query, connection)
-      connection.Promise.end = Promisify(connection.end, connection)
-
-      await connection.Promise.connect()
+      let connection = await Database.open(databaseUrl)
 
       try {
 
-        let statement = 'call insertAttendance(?, ?, ?)'
-        let values = [
-          request.body.meetingId,
-          request.body.userId,
-          request.body.attended
-        ]
-
-        // await connection.Promise.query(Database.format(statement, values))
-        //
-        // response.send(200)
-        // return next()
-
-        // let [rows, fields] = await connection.Promise.query(Database.format(statement, values))
-        // let data = {}
-        //
-        // for (let row of rows) {
-        //
-        //   if (!data.meetingId) {
-        //     data.meetingId = row.meetingId
-        //     data.meetingOn = row.meetingOn
-        //     data.meetingDescription = `Meeting on ${Moment(row.meetingOn).format('dddd [the] Do')}`
-        //     data.attendees = []
-        //   }
-        //
-        //   data.attendees.push({
-        //     'userId': row.userId,
-        //     'userName': row.userName,
-        //     'attended': row.attended,
-        //   })
-        //
-        // }
-
-        response.send(200, Attendance.toJSON(await connection.Promise.query(Database.format(statement, values))))
+        response.send(200, Attendance.toJSON(await connection.insertAttendance(request.body.meetingId, request.body.userId, request.body.attended)))
         return next()
 
       }
       finally {
-        await connection.Promise.end()
+        await connection.end()
       }
 
     }
@@ -139,9 +74,8 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
 }
 
-Attendance.toJSON = function(results) {
+Attendance.toJSON = function(rows) {
 
-  let [rows, fields] = results
   let data = {}
 
   for (let row of rows) {
@@ -153,11 +87,13 @@ Attendance.toJSON = function(results) {
       data.attendees = []
     }
 
-    data.attendees.push({
-      'userId': row.userId,
-      'userName': row.userName,
-      'attended': row.attended,
-    })
+    if (row.userId) {
+      data.attendees.push({
+        'userId': row.userId,
+        'userName': row.userName,
+        'attended': row.attended,
+      })
+    }
 
   }
 

@@ -2,9 +2,11 @@
   header.p-meeting.mdc-toolbar.mdc-toolbar--fixed
     div.mdc-toolbar__row
       section.mdc-toolbar__section.mdc-toolbar__section--align-start
-        span.mdc-toolbar__title
-          if !Is.null(element.attendance)
+        if !Is.null(element.attendance)
+          span.mdc-toolbar__title(data-meeting-id=element.attendance.meetingId)
             = element.attendance.meetingDescription
+        else
+          span.mdc-toolbar__title
         section.mdc-toolbar__section.mdc-toolbar__section--align-end
           a.p-refresh.material-icons.mdc-toolbar__icon--menu(href='#') 
             if Is.null(element.attendance)
@@ -14,8 +16,8 @@
   ul.p-attendees.mdc-toolbar-fixed-adjust.mdc-list
     if !Is.null(element.attendance)
       each attendee in element.attendance.attendees
-        li.p-attendee.mdc-list-item
-          span.mdc-list-item__text
+        li.p-attendee.mdc-list-item(data-user-id=attendee.userId)
+          span.mdc-list-item__text(data-user-id=attendee.userId)
             = attendee.userName
           a.p-attendee.mdc-list-item__end-detail.material-icons(class=attendee.attended == 0 ? 'p-not-attended' : ( attendee.attended == 1 ? 'p-attended' : 'p-unknown-attended' )
                                                                 data-attended=attendee.attended.toString()
