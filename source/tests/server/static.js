@@ -1,4 +1,4 @@
-import Assert from 'assert'
+import { assert as Assert } from 'chai'
 import { Log, Process } from 'mablung'
 import _Request from 'axios'
 

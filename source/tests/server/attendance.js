@@ -1,4 +1,4 @@
-import Assert from 'assert'
+import { assert as Assert } from 'chai'
 import Faker from 'faker'
 import { Log, Process } from 'mablung'
 import Moment from 'moment'
@@ -8,6 +8,33 @@ import Database from '../../server/library/database'
 import Server from '../../server/server'
 
 const Request = _Request.create({ 'baseURL': `http://${Process.env.ADDRESS}:${Process.env.PORT}` })
+
+const ATTENDANCE_SCHEMA = {
+  'title': 'Attendance',
+  'type': 'object',
+  'properties': {
+    'meetingId': { 'type': 'number' },
+    'meetingOn': { 'type': 'string' },
+    'meetingDescription': { 'type': 'string' },
+    'attendees': {
+      'type': 'array',
+      'items': {
+        'title': 'Attendance-Attendee',
+        'type': 'object',
+        'properties': {
+          'userId': { 'type': 'number' },
+          'userName': { 'type': 'string' },
+          'attended': {
+            'type': 'number',
+            "enum": [ 0, 1 ]
+          }
+        }
+      },
+      'uniqueItems': true
+    },
+  },
+  'required': [ 'meetingId', 'meetingOn', 'meetingDescription', 'attendees' ]
+}
 
 describe('attendance', () => {
 
@@ -53,6 +80,10 @@ describe('attendance', () => {
 
         })
 
+        it('should be valid', async () => {
+          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+        })
+
         it('should respond with this meeting', async () => {
           Assert.equal(attendance.meetingId, meetingId)
         })
@@ -63,7 +94,10 @@ describe('attendance', () => {
         })
 
         after(async () => {
+
+          await connection.restoreAllUsers()
           await connection.deleteMeeting(weekOf)
+
         })
 
       })
@@ -85,6 +119,10 @@ describe('attendance', () => {
 
           attendance = (await Request.get('/api/attendance')).data
 
+        })
+
+        it('should be valid', async () => {
+          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
         })
 
         it('should respond with this meeting', async () => {
@@ -131,7 +169,10 @@ describe('attendance', () => {
 
           attendance = (await Request.get('/api/attendance')).data
 
+        })
 
+        it('should be valid', async () => {
+          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
         })
 
         it('should respond with this meeting', async () => {
@@ -165,6 +206,70 @@ describe('attendance', () => {
 
     describe('PUT', () => {
 
+      describe('(when the meeting does not exist)', () => {
+
+        let userId = null
+        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+        before(async () => {
+          userId = await connection.insertUser(name)
+        })
+
+        it('should throw an error', async () => {
+
+          try {
+
+            let response = await Request.put('/api/attendance', {
+              'meetingId': 0,
+              'userId': userId,
+              'attended': false
+            })
+
+            Assert.fail()
+
+          }
+          catch (error) {}
+
+        })
+
+        after(async () => {
+          await connection.deleteUser(name)
+        })
+
+      })
+
+      describe('(when the user does not exist)', () => {
+
+        let meetingId = null
+        let weekOf = Moment()
+
+        before(async () => {
+          meetingId = await connection.insertMeeting(weekOf)
+        })
+
+        it('should throw an error', async () => {
+
+          try {
+
+            let response = await Request.put('/api/attendance', {
+              'meetingId': meetingId,
+              'userId': 0,
+              'attended': false
+            })
+
+            Assert.fail()
+
+          }
+          catch (error) {}
+
+        })
+
+        after(async () => {
+          await connection.deleteMeeting(weekOf)
+        })
+
+      })
+
       describe('(when the attendance does not exist)', () => {
 
         let meetingId = null
@@ -188,6 +293,10 @@ describe('attendance', () => {
 
           attendance = response.data
 
+        })
+
+        it('should be valid', async () => {
+          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
         })
 
         it('should respond with this meeting', async () => {
@@ -242,6 +351,10 @@ describe('attendance', () => {
 
         })
 
+        it('should be valid', async () => {
+          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+        })
+
         it('should respond with this meeting', async () => {
           Assert.equal(attendance.meetingId, meetingId)
         })
@@ -254,6 +367,7 @@ describe('attendance', () => {
 
         it('should respond with attended for this user', async () => {
           Assert.equal(attendance.attendees
+
             .filter((attendee) => attendee.userId == userId)
             .reduce((accumulator, attendee) => attendee.attended, false), true)
         })
@@ -263,7 +377,6 @@ describe('attendance', () => {
           await connection.deleteAttendance(meetingId, userId)
 
           await connection.deleteUser(name)
-          await connection.deleteMeeting(weekOf)
 
         })
 
@@ -444,6 +557,117 @@ describe('attendance', () => {
 
     })
 
+    describe('deleteAllUsers', () => {
+
+      let meetingId = null
+      let weekOf = Moment(Faker.date.future())
+
+      let userId0 = null
+      let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+      let userId1 = null
+      let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+      let userId2 = null
+      let name2 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+      before(async () => {
+
+        meetingId = await connection.insertMeeting(weekOf)
+
+        userId0 = await connection.insertUser(name0)
+        userId1 = await connection.insertUser(name1)
+        userId2 = await connection.insertUser(name2)
+
+        await connection.insertAttendance(meetingId, userId0, false)
+        await connection.insertAttendance(meetingId, userId1, false)
+        await connection.insertAttendance(meetingId, userId2, false)
+
+        await connection.deleteAllUsers()
+
+      })
+
+      it('should delete the first attendance', async () => {
+        Assert.ok(!await connection.existsAttendance(meetingId, userId0))
+      })
+
+      it('should delete the second attendance', async () => {
+        Assert.ok(!await connection.existsAttendance(meetingId, userId1))
+      })
+
+      it('should delete the third attendance', async () => {
+        Assert.ok(!await connection.existsAttendance(meetingId, userId2))
+      })
+
+      after(async () => {
+
+        await connection.restoreAllUsers()
+
+        await connection.deleteUser(name2)
+        await connection.deleteUser(name1)
+        await connection.deleteUser(name0)
+
+        await connection.deleteMeeting(weekOf)
+
+      })
+
+    })
+
+    describe('restoreAllUsers', () => {
+
+      let meetingId = null
+      let weekOf = Moment(Faker.date.future())
+
+      let userId0 = null
+      let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+      let userId1 = null
+      let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+      let userId2 = null
+      let name2 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+      before(async () => {
+
+        meetingId = await connection.insertMeeting(weekOf)
+
+        userId0 = await connection.insertUser(name0)
+        userId1 = await connection.insertUser(name1)
+        userId2 = await connection.insertUser(name2)
+
+        await connection.insertAttendance(meetingId, userId0, true)
+        await connection.insertAttendance(meetingId, userId1, true)
+        await connection.insertAttendance(meetingId, userId2, true)
+
+        await connection.deleteAllUsers()
+        await connection.restoreAllUsers()
+
+      })
+
+      it('should restore the first attendance', async () => {
+        Assert.ok(await connection.existsAttendance(meetingId, userId0))
+      })
+
+      it('should restore the second attendance', async () => {
+        Assert.ok(await connection.existsAttendance(meetingId, userId1))
+      })
+
+      it('should restore the third attendance', async () => {
+        Assert.ok(await connection.existsAttendance(meetingId, userId2))
+      })
+
+      after(async () => {
+
+        await connection.deleteUser(name2)
+        await connection.deleteUser(name1)
+        await connection.deleteUser(name0)
+
+        await connection.deleteMeeting(weekOf)
+
+      })
+
+    })
+
     describe('existsAttendance', () => {
 
       describe('(when the attendance does not exist)', () => {
@@ -538,7 +762,10 @@ describe('attendance', () => {
         })
 
         after(async () => {
+
+          await connection.restoreAllUsers()
           await connection.deleteMeeting(weekOf)
+
         })
 
       })

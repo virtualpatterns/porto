@@ -1,7 +1,11 @@
 import BabelPolyfill from 'babel-polyfill'
+import Chai from 'chai'
+import ChaiJSONSchema from 'chai-json-schema'
 import { Log, Process } from 'mablung'
 
 before(() => {
+
+  Chai.use(ChaiJSONSchema);
 
   Log.addFile(Process.env.LOG_PATH)
 

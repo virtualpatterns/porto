@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 5.7.17, for macos10.12 (x86_64)
 --
--- Host: DUMBLEDORE.local    Database: porto
+-- Host: PODMORE.local    Database: porto
 -- ------------------------------------------------------
--- Server version	5.7.19
+-- Server version	5.7.20
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -37,7 +37,7 @@ CREATE TABLE `attendance` (
   KEY `attendanceGet` (`userId`,`meetingId`,`attended`,`deleted`),
   CONSTRAINT `attendanceMeetingId` FOREIGN KEY (`meetingId`) REFERENCES `meeting` (`meetingId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `attendanceUserId` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=433 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -79,6 +79,58 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `batch`
+--
+
+DROP TABLE IF EXISTS `batch`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `batch` (
+  `batchId` int(11) NOT NULL AUTO_INCREMENT,
+  `inserted` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted` datetime DEFAULT NULL,
+  PRIMARY KEY (`batchId`),
+  KEY `batchGet` (`batchId`,`deleted`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `deletedAttendance`
+--
+
+DROP TABLE IF EXISTS `deletedAttendance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `deletedAttendance` (
+  `attendanceId` int(11) NOT NULL,
+  `batchId` int(11) NOT NULL,
+  PRIMARY KEY (`attendanceId`),
+  KEY `deletedAttendanceGet` (`attendanceId`,`batchId`),
+  KEY `deletedAttendanceBatchId` (`batchId`),
+  CONSTRAINT `deletedAttendanceBatchId` FOREIGN KEY (`batchId`) REFERENCES `batch` (`batchId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `deletedAttendanceId` FOREIGN KEY (`attendanceId`) REFERENCES `attendance` (`attendanceId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `deletedUser`
+--
+
+DROP TABLE IF EXISTS `deletedUser`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `deletedUser` (
+  `userId` int(11) NOT NULL,
+  `batchId` int(11) NOT NULL,
+  PRIMARY KEY (`userId`),
+  KEY `deletedUserGet` (`userId`,`batchId`),
+  KEY `deletedUserBatchId` (`batchId`),
+  CONSTRAINT `deletedUserBatchId` FOREIGN KEY (`batchId`) REFERENCES `batch` (`batchId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `deletedUserId` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `meeting`
 --
 
@@ -93,7 +145,7 @@ CREATE TABLE `meeting` (
   `deleted` datetime DEFAULT NULL,
   PRIMARY KEY (`meetingId`),
   KEY `meetingExists` (`on`,`deleted`,`meetingId`)
-) ENGINE=InnoDB AUTO_INCREMENT=411 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=712 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -147,7 +199,7 @@ CREATE TABLE `user` (
   `deleted` datetime DEFAULT NULL,
   PRIMARY KEY (`userId`),
   KEY `userExists` (`userId`,`name`,`deleted`)
-) ENGINE=InnoDB AUTO_INCREMENT=623 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1059 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -487,23 +539,52 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`fficnar`@`%` PROCEDURE `deleteAllUsers`()
 BEGIN
 
-	update	attendance
+	declare batchId int;
+
+	insert into batch (	inserted,
+						deleted)
+	values ( 	now(),
+				null);
+                
+    set batchId = last_insert_id();
+
+	insert
+    into	deletedAttendance (	attendanceId,
+								batchId )
+	select	attendance.attendanceId,
+			batchId
+	from	attendance
 				inner join user on
 					attendance.userId = user.userId and
 					user.deleted is null
-    set		attendance.updated = now(),
-			attendance.deleted = now()
 	where	attendance.deleted is null;
 
-	update	user
-    set		user.updated = now(),
-			user.deleted = now()
+	insert
+    into	deletedUser (	userId,
+							batchId )
+	select	user.userId,
+			batchId
+	from	user
 	where	user.deleted is null;
+
+	update	attendance
+				inner join deletedAttendance on
+					attendance.attendanceId = deletedAttendance.attendanceId and
+					deletedAttendance.batchId = batchId
+    set		attendance.updated = now(),
+			attendance.deleted = now();
+
+	update	user
+ 				inner join deletedUser on
+					user.userId = deletedUser.userId and
+					deletedUser.batchId = batchId
+	set		user.updated = now(),
+			user.deleted = now();
 
 END ;;
 DELIMITER ;
@@ -775,6 +856,58 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `restoreAllUsers` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fficnar`@`%` PROCEDURE `restoreAllUsers`()
+BEGIN
+
+	declare batchId int;    
+    
+    select	max(batch.batchId)
+    into	batchId
+    from	batch
+    where	batch.deleted is null;
+
+	update	user
+ 				inner join deletedUser on
+					user.userId = deletedUser.userId and
+					deletedUser.batchId = batchId
+	set		user.updated = now(),
+			user.deleted = null;
+
+	update	attendance
+				inner join deletedAttendance on
+					attendance.attendanceId = deletedAttendance.attendanceId and
+					deletedAttendance.batchId = batchId
+    set		attendance.updated = now(),
+			attendance.deleted = null;
+
+	delete
+    from	deletedUser
+	where	deletedUser.batchId = batchId;
+
+	delete
+    from	deletedAttendance
+	where	deletedAttendance.batchId = batchId;
+        
+	update	batch
+    set		batch.deleted = now()
+	where	batch.batchId = batchId;
+    
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `updateUser` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -811,4 +944,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-26 23:47:13
+-- Dump completed on 2017-11-29  1:32:43

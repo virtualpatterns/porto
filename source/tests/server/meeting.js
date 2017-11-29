@@ -1,4 +1,4 @@
-import Assert from 'assert'
+import { assert as Assert } from 'chai'
 import Faker from 'faker'
 import { Log, Process } from 'mablung'
 import Moment from 'moment'

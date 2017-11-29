@@ -28,6 +28,10 @@ connectionPrototype.deleteAllUsers = async function() {
   await this.query(this._connection.format('call deleteAllUsers();'))
 }
 
+connectionPrototype.restoreAllUsers = async function() {
+  await this.query(this._connection.format('call restoreAllUsers();'))
+}
+
 connectionPrototype.nextMeetingOn = async function(weekOf) {
   Log.debug(`- this.nextMeetingOn('${weekOf.toDate()}') { ... }`)
 

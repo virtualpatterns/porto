@@ -1,4 +1,4 @@
-import Assert from 'assert'
+import { assert as Assert } from 'chai'
 import Faker from 'faker'
 import { Process } from 'mablung'
 
@@ -145,6 +145,95 @@ describe('insertUser ...', () => {
       it('should not throw an error', async () => {
         await connection.deleteUser(`${Faker.name.lastName()}, ${Faker.name.firstName()}`)
       })
+
+    })
+
+  })
+
+  describe('deleteAllUsers', () => {
+
+    let userId0 = null
+    let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+    let userId1 = null
+    let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+    let userId2 = null
+    let name2 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+    before(async () => {
+
+      userId0 = await connection.insertUser(name0)
+      userId1 = await connection.insertUser(name1)
+      userId2 = await connection.insertUser(name2)
+
+      await connection.deleteAllUsers()
+
+    })
+
+    it('should delete the first user', async () => {
+      Assert.ok(!await connection.existsUser(name0))
+    })
+
+    it('should delete the second user', async () => {
+      Assert.ok(!await connection.existsUser(name1))
+    })
+
+    it('should delete the third user', async () => {
+      Assert.ok(!await connection.existsUser(name2))
+    })
+
+    after(async () => {
+
+      await connection.restoreAllUsers()
+
+      await connection.deleteUser(name2)
+      await connection.deleteUser(name1)
+      await connection.deleteUser(name0)
+
+    })
+
+  })
+
+  describe('restoreAllUsers', () => {
+
+    let userId0 = null
+    let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+    let userId1 = null
+    let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+    let userId2 = null
+    let name2 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+    before(async () => {
+
+      userId0 = await connection.insertUser(name0)
+      userId1 = await connection.insertUser(name1)
+      userId2 = await connection.insertUser(name2)
+
+      await connection.deleteAllUsers()
+      await connection.restoreAllUsers()
+
+    })
+
+    it('should restore the first user', async () => {
+      Assert.ok(await connection.existsUser(name0))
+    })
+
+    it('should restore the second user', async () => {
+      Assert.ok(await connection.existsUser(name1))
+    })
+
+    it('should restore the third user', async () => {
+      Assert.ok(await connection.existsUser(name2))
+    })
+
+    after(async () => {
+
+      await connection.deleteUser(name2)
+      await connection.deleteUser(name1)
+      await connection.deleteUser(name0)
 
     })
 

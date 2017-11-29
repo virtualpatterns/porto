@@ -14,9 +14,9 @@ Status.createRoutes = function(server, options) {
 
   server.get('/api/status', function(request, response, next) {
 
-    var memory = Process.memoryUsage()
+    let memory = Process.memoryUsage()
 
-    var status = {
+    let status = {
       'name': Package.name,
       'now': new Date().toISOString(),
       'version': Package.version,
@@ -34,10 +34,6 @@ Status.createRoutes = function(server, options) {
   server.head('/api/error', function(request, response, next) {
     return next(new RESTErrors.InternalServerError('server.head(\'/api/error\', function(request, response, next) { ... })'))
   })
-
-  // server.head('/api/crash', function(request, response, next) {
-  //   throw new Error('server.head(\'/api/crash\', function(request, response, next) { ... })')
-  // })
 
 }
 
