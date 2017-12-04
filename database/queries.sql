@@ -22,4 +22,7 @@ delete from user;
 delete from batch;
 
 select * from batch;
-select * from deletedUser where batchid = 20;
+select * from deletedUser;
+select * from user;
+
+call clean();
