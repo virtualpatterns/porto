@@ -4,6 +4,10 @@
   "license": "ISC",
   "main": "server/index.js",
   "name": "porto",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/virtualpatterns/porto"
+  },
   "scripts": {
     "upgrade": "npm-check-updates --upgrade",
     "clean": "rm -r -f ./library ./sandbox ./server ./tests ./webpack.config.js ./www",
