@@ -7,7 +7,7 @@ import Server from './server'
 
 const ADDRESS = '0.0.0.0'
 const DATABASE_URL = 'mysql://localhost/porto'
-const LOG_PATH = Path.join(Process.cwd(), `${Package.name}.log`)
+const LOG_PATH = Path.join(Process.cwd(), `porto.log`)
 const MODULES_PATH = Path.join(__dirname, '../node_modules')
 const PORT = 8080
 const STATIC_PATH = Path.join(__dirname, '../www')
