@@ -25,10 +25,11 @@
     "clean": "rm -r -f ./library ./sandbox ./server ./tests ./webpack.config.js ./www",
     "build": "npm run-script clean && babel ./source --copy-files --out-dir . --source-maps inline",
     "bundle": "npm run-script build && webpack",
+    "lint": "eslint --ignore-path .gitignore ./source",
     "run": "npm run-script bundle && node server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto.log",
     "run-debug": "rm -f /var/log/porto/porto.log && npm run-script bundle && node --inspect server/index.js run --databaseUrl mysql://porto:porto@localhost/porto?debug=true --logPath /var/log/porto/porto.log",
-    "test": "npm run-script bundle && env ADDRESS=\"0.0.0.0\" DATABASE_URL=\"mysql://porto:porto@localhost/porto?multipleStatements=true\" LOG_PATH=\"/var/log/porto/porto.tests.log\" MODULES_PATH=\"./node_modules\" PORT=\"8080\" STATIC_PATH=\"./www\" istanbul cover ./node_modules/.bin/_mocha --dir ./www/coverage -- --bail --recursive --timeout 0 ./tests",
-    "test-debug": "rm -f /var/log/porto/porto.test.log && npm run-script bundle && env ADDRESS=\"0.0.0.0\" DATABASE_URL=\"mysql://porto:porto@localhost/porto?multipleStatements=true\" LOG_PATH=\"/var/log/porto/porto.tests.log\" MODULES_PATH=\"./node_modules\" PORT=\"8080\" STATIC_PATH=\"./www\" mocha --bail --inspect-brk --recursive --timeout 0 ./tests",
+    "test": "rm -f /var/log/porto/porto.test.log && npm run-script bundle && npm run-script lint && env ADDRESS=\"0.0.0.0\" DATABASE_URL=\"mysql://porto:porto@localhost/porto?multipleStatements=true\" LOG_PATH=\"/var/log/porto/porto.test.log\" MODULES_PATH=\"./node_modules\" PORT=\"8080\" STATIC_PATH=\"./www\" istanbul cover ./node_modules/.bin/_mocha --dir ./source/www/coverage -- --bail --recursive --timeout 0 ./tests",
+    "test-debug": "rm -f /var/log/porto/porto.test.log && npm run-script bundle && npm run-script lint && env ADDRESS=\"0.0.0.0\" DATABASE_URL=\"mysql://porto:porto@localhost/porto?multipleStatements=true\" LOG_PATH=\"/var/log/porto/porto.test.log\" MODULES_PATH=\"./node_modules\" PORT=\"8080\" STATIC_PATH=\"./www\" mocha --bail --inspect-brk --recursive --timeout 0 ./tests",
     "check": "depcheck --ignore-dirs=source,sandbox",
     "get-attendance": "http GET http://localhost:8080/api/attendance",
     "put-attendance": "http PUT http://localhost:8080/api/attendance meetingId=225 userId=71 attended:=true",
@@ -63,13 +64,15 @@
     "chai": "^4.1.2",
     "chai-json-schema": "^1.5.0",
     "depcheck": "^0.6.8",
+    "eslint": "^4.13.0",
     "faker": "^4.1.0",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1",
     "nessa": "0.0.23",
-    "nodemon": "^1.12.4",
+    "nodemon": "^1.12.5",
     "npm-check-updates": "^2.13.0",
     "puppeteer": "^0.13.0",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "webpack-monitor": "^1.0.14"
   }
 }

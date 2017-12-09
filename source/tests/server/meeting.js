@@ -1,6 +1,6 @@
 import { assert as Assert } from 'chai'
 import Faker from 'faker'
-import { Log, Process } from 'mablung'
+import { Process } from 'mablung'
 import Moment from 'moment'
 
 import Database from '../../server/library/database'
@@ -17,11 +17,10 @@ describe('insertMeeting ...', () => {
 
     describe('(when inserting a new meeting date)', () => {
 
-      let meetingId = null
       let weekOf = Moment(Faker.date.future())
 
       before(async () => {
-        meetingId = await connection.insertMeeting(weekOf)
+        await connection.insertMeeting(weekOf)
       })
 
       it('should create the meeting', async () => {
@@ -36,20 +35,23 @@ describe('insertMeeting ...', () => {
 
     describe('(when inserting an existing meeting date)', () => {
 
-      let meetingId = null
       let weekOf = Moment(Faker.date.future())
 
       before(async () => {
-        meetingId = await connection.insertMeeting(weekOf)
+        await connection.insertMeeting(weekOf)
       })
 
       it('should throw an error', async () => {
 
         try {
+
           await connection.insertMeeting(weekOf)
+
           Assert.fail()
+
+        } catch (error) {
+          // OK
         }
-        catch (error) {}
 
       })
 
@@ -65,11 +67,10 @@ describe('insertMeeting ...', () => {
 
     describe('(when deleting a meeting that exists)', () => {
 
-      let meetingId = null
       let weekOf = Moment(Faker.date.future())
 
       before(async () => {
-        meetingId = await connection.insertMeeting(weekOf)
+        await connection.insertMeeting(weekOf)
         await connection.deleteMeeting(weekOf)
       })
 
@@ -101,11 +102,10 @@ describe('insertMeeting ...', () => {
 
     describe('(when the meeting exists)', () => {
 
-      let meetingId = null
       let weekOf = Moment(Faker.date.future())
 
       before(async () => {
-        meetingId = await connection.insertMeeting(weekOf)
+        await connection.insertMeeting(weekOf)
       })
 
       it('should be true', async () => {

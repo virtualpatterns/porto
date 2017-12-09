@@ -17,7 +17,7 @@ Static.createRoutes = function(server, staticPath, modulesPath) {
   server.get('/favicon.ico', (request, response, next) => {
     RESTPlugins.serveStatic({
       'directory': Path.join(staticPath, 'resources'),
-      'file': `application.ico`,
+      'file': 'application.ico',
       'maxAge': 0
     })(request, response, next)
   })

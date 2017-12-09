@@ -86,8 +86,8 @@ attendancePrototype.onAttended = async function(event) {
     let attended = event.target['data-attended']
 
     this.attendance.attendees
-      .filter(attendee => attendee.userId == event.target['data-user-id'])
-      .forEach(attendee => attendee.attended = 2)
+      .filter((attendee) => attendee.userId == event.target['data-user-id'])
+      .forEach((attendee) => attendee.attended = 2)
 
     this.render()
 

@@ -1,5 +1,5 @@
 import { assert as Assert } from 'chai'
-import { Log, Process } from 'mablung'
+import { Process } from 'mablung'
 import _Request from 'axios'
 
 import Server from '../../server/server'
@@ -37,17 +37,18 @@ describe('/api/status', () => {
 
   before(async () => {
 
-    await Server.start( Process.env.ADDRESS,
-                        Process.env.PORT,
-                        Process.env.STATIC_PATH,
-                        Process.env.MODULES_PATH,
-                        Process.env.DATABASE_URL)
+    await Server.start(
+      Process.env.ADDRESS,
+      Process.env.PORT,
+      Process.env.STATIC_PATH,
+      Process.env.MODULES_PATH,
+      Process.env.DATABASE_URL)
 
   })
 
   describe('HEAD', () => {
 
-    it(`should respond with 200 OK`, async () => {
+    it('should respond with 200 OK', async () => {
       Assert.equal((await Request.head('/api/status')).status, 200)
     })
 

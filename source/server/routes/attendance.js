@@ -1,6 +1,5 @@
 import { Log } from 'mablung'
 import Moment from 'moment'
-import Promisify from 'es6-promisify'
 import RESTErrors from 'restify-errors'
 
 import Database from '../library/database'

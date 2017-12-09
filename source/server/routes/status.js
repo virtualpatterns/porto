@@ -5,14 +5,14 @@ import Package from '../../package.json'
 
 const Status = Object.create({})
 
-Status.createRoutes = function(server, options) {
+Status.createRoutes = function (server) {
 
-  server.head('/api/status', function(request, response, next) {
+  server.head('/api/status', (request, response, next) => {
     response.send(200)
     return next()
   })
 
-  server.get('/api/status', function(request, response, next) {
+  server.get('/api/status', (request, response, next) => {
 
     let memory = Process.memoryUsage()
 
@@ -31,8 +31,8 @@ Status.createRoutes = function(server, options) {
 
   })
 
-  server.head('/api/error', function(request, response, next) {
-    return next(new RESTErrors.InternalServerError('server.head(\'/api/error\', function(request, response, next) { ... })'))
+  server.head('/api/error', (request, response, next) => {
+    return next(new RESTErrors.InternalServerError('server.head(\'/api/error\', (request, response, next) => { ... })'))
   })
 
 }

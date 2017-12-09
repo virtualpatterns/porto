@@ -16,11 +16,10 @@ describe('insertUser ...', () => {
 
     describe('(when inserting a new user name)', () => {
 
-      let userId = null
       let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
       before(async () => {
-        userId = await connection.insertUser(name)
+        await connection.insertUser(name)
       })
 
       it('should create the user', async () => {
@@ -35,20 +34,23 @@ describe('insertUser ...', () => {
 
     describe('(when inserting an existing user name)', () => {
 
-      let userId = null
       let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
       before(async () => {
-        userId = await connection.insertUser(name)
+        await connection.insertUser(name)
       })
 
       it('should throw an error', async () => {
 
         try {
+
           await connection.insertUser(name)
+
           Assert.fail()
+          
+        } catch (error) {
+          // OK
         }
-        catch (error) {}
 
       })
 
@@ -64,14 +66,12 @@ describe('insertUser ...', () => {
 
     describe('(when updating to a new user name)', () => {
 
-      let userId = null
-
       let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
       let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
       before(async () => {
 
-        userId = await connection.insertUser(name0)
+        await connection.insertUser(name0)
         await connection.updateUser(name0, name1)
 
       })
@@ -88,26 +88,27 @@ describe('insertUser ...', () => {
 
     describe('(when updating to an existing user name)', () => {
 
-      let userId0 = null
       let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-      let userId1 = null
       let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
       before(async () => {
 
-        userId0 = await connection.insertUser(name0)
-        userId1 = await connection.insertUser(name1)
+        await connection.insertUser(name0)
+        await connection.insertUser(name1)
 
       })
 
       it('should throw an error', async () => {
 
         try {
+
           await connection.updateUser(name0, name1)
+
           Assert.fail()
+
+        } catch (error) {
+          // OK
         }
-        catch (error) {}
 
       })
 
@@ -126,12 +127,13 @@ describe('insertUser ...', () => {
 
     describe('(when deleting a user that exists)', () => {
 
-      let userId = null
       let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
       before(async () => {
-        userId = await connection.insertUser(name)
+
+        await connection.insertUser(name)
         await connection.deleteUser(name)
+
       })
 
       it('should delete the user', async () => {
@@ -152,20 +154,15 @@ describe('insertUser ...', () => {
 
   describe('deleteAllUsers', () => {
 
-    let userId0 = null
     let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-    let userId1 = null
     let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-    let userId2 = null
     let name2 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
     before(async () => {
 
-      userId0 = await connection.insertUser(name0)
-      userId1 = await connection.insertUser(name1)
-      userId2 = await connection.insertUser(name2)
+      await connection.insertUser(name0)
+      await connection.insertUser(name1)
+      await connection.insertUser(name2)
 
       await connection.deleteAllUsers()
 
@@ -197,20 +194,15 @@ describe('insertUser ...', () => {
 
   describe('restoreAllUsers', () => {
 
-    let userId0 = null
     let name0 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-    let userId1 = null
     let name1 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-    let userId2 = null
     let name2 = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
     before(async () => {
 
-      userId0 = await connection.insertUser(name0)
-      userId1 = await connection.insertUser(name1)
-      userId2 = await connection.insertUser(name2)
+      await connection.insertUser(name0)
+      await connection.insertUser(name1)
+      await connection.insertUser(name2)
 
       await connection.deleteAllUsers()
       await connection.restoreAllUsers()
@@ -251,11 +243,10 @@ describe('insertUser ...', () => {
 
     describe('(when the user exists)', () => {
 
-      let userId = null
       let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
       before(async () => {
-        userId = await connection.insertUser(name)
+        await connection.insertUser(name)
       })
 
       it('should be true', async () => {

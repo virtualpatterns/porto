@@ -66,7 +66,7 @@ connectionPrototype.existsAttendance = async function(meetingId, userId) {
 }
 
 connectionPrototype.insertAttendance = async function(meetingId, userId, attended) {
-  let [ rows, fields ] = await this.query(this._connection.format('call insertAttendance(?, ?, ?);', [ meetingId, userId, attended ]))
+  let [ rows, ] = await this.query(this._connection.format('call insertAttendance(?, ?, ?);', [ meetingId, userId, attended ]))
   return rows
 }
 
@@ -90,7 +90,7 @@ connectionPrototype.getAttendance = async function(...parameters) {
     weekOf = null
   }
 
-  let [ rows, fields ] = await this.query(this._connection.format('call getAttendance(?, ?);', [ meetingId, weekOf ]))
+  let [ rows, ] = await this.query(this._connection.format('call getAttendance(?, ?);', [ meetingId, weekOf ]))
   return rows
 
 }
@@ -123,7 +123,7 @@ Connection.createConnection = function(_connection, prototype = connectionProtot
 
 }
 
-Connection.isConnection = function(element) {
+Connection.isConnection = function(connection) {
   return connectionPrototype.isPrototypeOf(connection)
 }
 

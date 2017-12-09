@@ -1,6 +1,6 @@
 import Assert from 'assert'
 import Faker from 'faker'
-import { Log, Process } from 'mablung'
+import { Process } from 'mablung'
 import Moment from 'moment'
 import Puppeteer from 'puppeteer'
 
@@ -18,11 +18,12 @@ describe('/www/index.html', () => {
 
     connection = await Database.open(Process.env.DATABASE_URL)
 
-    await Server.start( Process.env.ADDRESS,
-                        Process.env.PORT,
-                        Process.env.STATIC_PATH,
-                        Process.env.MODULES_PATH,
-                        Process.env.DATABASE_URL)
+    await Server.start(
+      Process.env.ADDRESS,
+      Process.env.PORT,
+      Process.env.STATIC_PATH,
+      Process.env.MODULES_PATH,
+      Process.env.DATABASE_URL)
 
     browser = await Puppeteer.launch()
     page = await browser.newPage()
@@ -49,8 +50,6 @@ describe('/www/index.html', () => {
   describe('(when refreshed)', () => {
 
     let userId = null
-    let userIdBefore = null
-    let userIdAfter = null
 
     let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
     let nameBefore = `Aa ${name}`
@@ -59,8 +58,8 @@ describe('/www/index.html', () => {
     before(async () => {
 
       userId = await connection.insertUser(name)
-      userIdBefore = await connection.insertUser(nameBefore)
-      userIdAfter = await connection.insertUser(nameAfter)
+      await connection.insertUser(nameBefore)
+      await connection.insertUser(nameAfter)
 
       await page.tap('a.p-refresh')
       await page.waitForSelector('div.p-overlay.p-overlay-hidden')
