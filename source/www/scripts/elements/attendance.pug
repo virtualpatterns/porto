@@ -7,12 +7,12 @@
             = element.attendance.meetingDescription
         else
           span.mdc-toolbar__title
-        section.mdc-toolbar__section.mdc-toolbar__section--align-end
-          a.p-refresh.material-icons.mdc-toolbar__icon--menu(href='#') 
-            if Is.null(element.attendance)
-              | more_horiz
-            else
-              | refresh
+      section.mdc-toolbar__section.mdc-toolbar__section--align-end
+        a.p-refresh.material-icons.mdc-toolbar__icon(href='#') 
+          if Is.null(element.attendance)
+            | more_horiz
+          else
+            | refresh
   ul.p-attendees.mdc-toolbar-fixed-adjust.mdc-list
     if !Is.null(element.attendance)
       each attendee in element.attendance.attendees
