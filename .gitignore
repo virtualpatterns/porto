@@ -1,5 +1,8 @@
 .DS_Store
 *.bts
+*.err
+*.log
+*.out
 /library
 /node_modules
 /process
