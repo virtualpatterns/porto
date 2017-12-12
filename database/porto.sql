@@ -37,7 +37,7 @@ CREATE TABLE `attendance` (
   KEY `attendanceGet` (`userId`,`meetingId`,`attended`,`deleted`),
   CONSTRAINT `attendanceMeetingId` FOREIGN KEY (`meetingId`) REFERENCES `meeting` (`meetingId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `attendanceUserId` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=433 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=942 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -91,7 +91,7 @@ CREATE TABLE `batch` (
   `deleted` datetime DEFAULT NULL,
   PRIMARY KEY (`batchId`),
   KEY `batchGet` (`batchId`,`deleted`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=195 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,6 +131,70 @@ CREATE TABLE `deletedUser` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `insertedAttendance`
+--
+
+DROP TABLE IF EXISTS `insertedAttendance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `insertedAttendance` (
+  `attendanceId` int(11) NOT NULL,
+  `current` tinyint(4) NOT NULL DEFAULT '1',
+  `remoteAddress` varchar(100) NOT NULL,
+  `userAgent` varchar(200) NOT NULL,
+  `inserted` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `updatedAttendanceGet` (`attendanceId`,`current`,`remoteAddress`,`userAgent`,`inserted`),
+  KEY `updatedAttendanceUpdate` (`attendanceId`,`current`),
+  CONSTRAINT `insertedAttendanceId` FOREIGN KEY (`attendanceId`) REFERENCES `attendance` (`attendanceId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`fficnar`@`%`*/ /*!50003 TRIGGER `porto`.`insertedAttendanceOnInsert` BEFORE INSERT ON `insertedAttendance` FOR EACH ROW
+BEGIN
+
+	if new.current > 0 then
+		call checkInsertedAttendance(new.attendanceId);
+	end if;
+    
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`fficnar`@`%`*/ /*!50003 TRIGGER `porto`.`insertedAttendanceOnUpdate` BEFORE UPDATE ON `insertedAttendance` FOR EACH ROW
+BEGIN
+
+	if new.current > 0 then
+		call checkInsertedAttendance(new.attendanceId);
+	end if;
+    
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
 -- Table structure for table `meeting`
 --
 
@@ -145,7 +209,7 @@ CREATE TABLE `meeting` (
   `deleted` datetime DEFAULT NULL,
   PRIMARY KEY (`meetingId`),
   KEY `meetingExists` (`on`,`deleted`,`meetingId`)
-) ENGINE=InnoDB AUTO_INCREMENT=712 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1279 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -199,7 +263,7 @@ CREATE TABLE `user` (
   `deleted` datetime DEFAULT NULL,
   PRIMARY KEY (`userId`),
   KEY `userExists` (`userId`,`name`,`deleted`)
-) ENGINE=InnoDB AUTO_INCREMENT=1059 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2036 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -295,6 +359,30 @@ BEGIN
         end if;
         
     end if;
+    
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `existsInsertedAttendance` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fficnar`@`%` FUNCTION `existsInsertedAttendance`(attendanceId int) RETURNS tinyint(1)
+BEGIN
+
+	return exists (	select	null
+					from 	insertedAttendance
+					where	insertedAttendance.attendanceId = attendanceId and
+							insertedAttendance.current > 0);
     
 END ;;
 DELIMITER ;
@@ -446,6 +534,32 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `checkInsertedAttendance` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fficnar`@`%` PROCEDURE `checkInsertedAttendance`(in attendanceId int)
+BEGIN
+
+	if existsInsertedAttendance(attendanceId) then
+    
+		signal sqlstate '45000'
+		  set message_text = 'A current record already exists.';
+          
+	end if;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `checkMeeting` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -512,6 +626,12 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`fficnar`@`%` PROCEDURE `clean`()
 BEGIN
+
+	delete	insertedAttendance
+	from    insertedAttendance
+				inner join attendance on
+					insertedAttendance.attendanceId = attendance.attendanceId and
+                    not attendance.deleted is null;
 
 	delete 
 	from    attendance
@@ -717,7 +837,14 @@ BEGIN
             user.userId,
             user.name                           as userName,
             attendance.attendanceId,
-			ifnull(attendance.attended, 0)      as attended
+            case
+				when user.userId is null then null
+                when attendance.userId  is null then 0
+                else attendance.attended
+            end      							as attended,
+            insertedAttendance.remoteAddress,
+            insertedAttendance.userAgent,
+            insertedAttendance.inserted
     from    meeting
                 left outer join user on
                     user.deleted is null
@@ -725,6 +852,9 @@ BEGIN
                         meeting.meetingId = attendance.meetingId and
                         user.userId = attendance.userId and
                         attendance.deleted is null
+						left outer join insertedAttendance on
+							attendance.attendanceId = insertedAttendance.attendanceId and
+                            insertedAttendance.current > 0
     where   meeting.meetingId = _meetingId and
             meeting.deleted is null
     order
@@ -748,8 +878,12 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insertAttendance`( in meetingId int,
                                                                 in userId int, 
-                                                                in attended boolean )
+                                                                in attended boolean, 
+																in remoteAddress varchar(100), 
+																in userAgent varchar(200) )
 BEGIN
+
+    declare _attendanceId int;
 
 	if not existsAttendance(null, meetingId, userId) then
 
@@ -764,16 +898,42 @@ BEGIN
                     now(),
                     now() );
 
+		set _attendanceId = last_insert_id();
+
     else
 
-		update	attendance
-		set		attendance.attended = attended,
-				attendance.updated = now()
+		select	attendance.attendanceId
+        into	_attendanceId
+		from	attendance
 		where	attendance.meetingId = meetingId and
 				attendance.userId = userId and
                 attendance.deleted is null;
 
+		update	attendance
+		set		attendance.attended = attended,
+				attendance.updated = now()
+		where	attendance.attendanceId = _attendanceId;
+
+		update	insertedAttendance
+		set		insertedAttendance.current = 0,
+				insertedAttendance.updated = now()
+		where	insertedAttendance.attendanceId = _attendanceId and
+				insertedAttendance.current > 0;
+
     end if;
+
+	insert into	insertedAttendance (	attendanceId,
+										current,
+										remoteAddress,
+										userAgent,
+										inserted,
+										updated)
+	values (	_attendanceId,
+				1,
+				remoteAddress,
+				userAgent,
+				now(),
+				now() );
     
     call getAttendance(meetingId, null);
 
@@ -944,4 +1104,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-29  1:32:43
+-- Dump completed on 2017-12-11  1:11:59

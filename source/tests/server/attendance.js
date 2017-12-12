@@ -36,6 +36,9 @@ const ATTENDANCE_SCHEMA = {
   'required': [ 'meetingId', 'meetingOn', 'meetingDescription', 'attendees' ]
 }
 
+const REMOTE_ADDRESS = '0.0.0.0'
+const USER_AGENT = 'User-Agent'
+
 describe('attendance', () => {
 
   describe('/api/attendance', () => {
@@ -95,10 +98,7 @@ describe('attendance', () => {
         })
 
         after(async () => {
-
           await connection.restoreAllUsers()
-          await connection.deleteMeeting(weekOf)
-
         })
 
       })
@@ -143,15 +143,12 @@ describe('attendance', () => {
         })
 
         after(async () => {
-
           await connection.deleteUser(name)
-          await connection.deleteMeeting(weekOf)
-
         })
 
       })
 
-      describe('(when the attendance exists)', () => {
+      describe('(when the attendance exists as not attended)', () => {
 
         let meetingId = null
         let weekOf = Moment()
@@ -166,7 +163,55 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, true)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
+
+          attendance = (await Request.get('/api/attendance')).data
+
+        })
+
+        it('should be valid', async () => {
+          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+        })
+
+        it('should respond with this meeting', async () => {
+          Assert.equal(attendance.meetingId, meetingId)
+        })
+
+        it('should respond with one row for this user', async () => {
+          Assert.equal(attendance.attendees
+            .filter((attendee) => attendee.userId == userId)
+            .length, 1)
+        })
+
+        it('should respond with not attended for this user', async () => {
+          Assert.equal(attendance.attendees
+            .filter((attendee) => attendee.userId == userId)
+            .reduce((accumulator, attendee) => attendee.attended, false), false)
+        })
+
+        after(async () => {
+          await connection.deleteAttendance(meetingId, userId)
+          await connection.deleteUser(name)
+        })
+
+      })
+
+      describe('(when the attendance exists as attended)', () => {
+
+        let meetingId = null
+        let weekOf = Moment()
+
+        let userId = null
+        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+        let attendance = null
+
+        before(async () => {
+
+          meetingId = await connection.insertMeeting(weekOf)
+          userId = await connection.insertUser(name)
+
+          await connection.insertAttendance(meetingId, userId, true, REMOTE_ADDRESS, USER_AGENT)
 
           attendance = (await Request.get('/api/attendance')).data
 
@@ -193,12 +238,8 @@ describe('attendance', () => {
         })
 
         after(async () => {
-
           await connection.deleteAttendance(meetingId, userId)
-
           await connection.deleteUser(name)
-          await connection.deleteMeeting(weekOf)
-
         })
 
       })
@@ -267,10 +308,6 @@ describe('attendance', () => {
 
         })
 
-        after(async () => {
-          await connection.deleteMeeting(weekOf)
-        })
-
       })
 
       describe('(when the attendance does not exist)', () => {
@@ -319,10 +356,7 @@ describe('attendance', () => {
         })
 
         after(async () => {
-
           await connection.deleteUser(name)
-          await connection.deleteMeeting(weekOf)
-
         })
 
       })
@@ -342,7 +376,7 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, false)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
 
           let response = await Request.put('/api/attendance', {
             'meetingId': meetingId,
@@ -376,11 +410,8 @@ describe('attendance', () => {
         })
 
         after(async () => {
-
           await connection.deleteAttendance(meetingId, userId)
-
           await connection.deleteUser(name)
-
         })
 
       })
@@ -419,7 +450,7 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, false)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
 
         })
 
@@ -463,8 +494,8 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, false)
-          await connection.insertAttendance(meetingId, userId, true)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
+          await connection.insertAttendance(meetingId, userId, true, REMOTE_ADDRESS, USER_AGENT)
 
         })
 
@@ -512,7 +543,7 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, false)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
           await connection.deleteAttendance(meetingId, userId)
 
         })
@@ -582,9 +613,9 @@ describe('attendance', () => {
         userId1 = await connection.insertUser(name1)
         userId2 = await connection.insertUser(name2)
 
-        await connection.insertAttendance(meetingId, userId0, false)
-        await connection.insertAttendance(meetingId, userId1, false)
-        await connection.insertAttendance(meetingId, userId2, false)
+        await connection.insertAttendance(meetingId, userId0, false, REMOTE_ADDRESS, USER_AGENT)
+        await connection.insertAttendance(meetingId, userId1, false, REMOTE_ADDRESS, USER_AGENT)
+        await connection.insertAttendance(meetingId, userId2, false, REMOTE_ADDRESS, USER_AGENT)
 
         await connection.deleteAllUsers()
 
@@ -638,9 +669,9 @@ describe('attendance', () => {
         userId1 = await connection.insertUser(name1)
         userId2 = await connection.insertUser(name2)
 
-        await connection.insertAttendance(meetingId, userId0, true)
-        await connection.insertAttendance(meetingId, userId1, true)
-        await connection.insertAttendance(meetingId, userId2, true)
+        await connection.insertAttendance(meetingId, userId0, true, REMOTE_ADDRESS, USER_AGENT)
+        await connection.insertAttendance(meetingId, userId1, true, REMOTE_ADDRESS, USER_AGENT)
+        await connection.insertAttendance(meetingId, userId2, true, REMOTE_ADDRESS, USER_AGENT)
 
         await connection.deleteAllUsers()
         await connection.restoreAllUsers()
@@ -714,7 +745,7 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, false)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
 
         })
 
@@ -806,6 +837,18 @@ describe('attendance', () => {
             .reduce((accumulator, row) => row.attended, false), false)
         })
 
+        it('attendance (remote address) should be null for this user', async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.remoteAddress, null), null)
+        })
+
+        it('attendance (user agent) should be null for this user', async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.userAgent, null), null)
+        })
+
         after(async () => {
 
           await connection.deleteUser(name)
@@ -815,7 +858,7 @@ describe('attendance', () => {
 
       })
 
-      describe('(when the attendance exists)', () => {
+      describe('(when the attendance exists as not attended)', () => {
 
         let meetingId = null
         let weekOf = Moment(Faker.date.future())
@@ -828,7 +871,7 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          await connection.insertAttendance(meetingId, userId, false)
+          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
 
         })
 
@@ -848,6 +891,76 @@ describe('attendance', () => {
           Assert.equal((await connection.getAttendance(meetingId))
             .filter((row) => row.userId == userId)
             .reduce((accumulator, row) => row.attended, false), false)
+        })
+
+        it(`attendance (remote address) should be '${REMOTE_ADDRESS}' for this user`, async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.remoteAddress, null), REMOTE_ADDRESS)
+        })
+
+        it(`attendance (user agent) should be '${USER_AGENT}' for this user`, async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.userAgent, null), USER_AGENT)
+        })
+
+        after(async () => {
+
+          await connection.deleteAttendance(meetingId, userId)
+
+          await connection.deleteUser(name)
+          await connection.deleteMeeting(weekOf)
+
+        })
+
+      })
+
+      describe('(when the attendance exists as attended)', () => {
+
+        let meetingId = null
+        let weekOf = Moment(Faker.date.future())
+
+        let userId = null
+        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+        before(async () => {
+
+          meetingId = await connection.insertMeeting(weekOf)
+          userId = await connection.insertUser(name)
+
+          await connection.insertAttendance(meetingId, userId, true, REMOTE_ADDRESS, USER_AGENT)
+
+        })
+
+        it('attendance should have one row for this user', async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .length, 1)
+        })
+
+        it('attendance should be not null for this user', async () => {
+          Assert.notEqual((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.attendanceId, null), null)
+        })
+
+        it('attendance should be attended for this user', async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.attended, false), true)
+        })
+
+        it(`attendance (remote address) should be '${REMOTE_ADDRESS}' for this user`, async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.remoteAddress, null), REMOTE_ADDRESS)
+        })
+
+        it(`attendance (user agent) should be '${USER_AGENT}' for this user`, async () => {
+          Assert.equal((await connection.getAttendance(meetingId))
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.userAgent, null), USER_AGENT)
         })
 
         after(async () => {

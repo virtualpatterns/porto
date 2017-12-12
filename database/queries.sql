@@ -6,11 +6,7 @@ set @userId = 0; call insertUser(@userId, 'Ee'); select @userId as userId;
 
 call getAttendance(null, null);
 
-call insertAttendance(667, 962, 1);
-call insertAttendance(667, 963, 0);
-call insertAttendance(667, 964, 1);
-call insertAttendance(667, 965, 0);
-call insertAttendance(667, 966, 1);
+call insertAttendance(1055, 1657, 1, '0.0.0.0', 'User-Agent');
 
 call getAttendance(null, null);
 
@@ -24,5 +20,6 @@ delete from batch;
 select * from batch;
 select * from deletedUser;
 select * from user;
+select * from updatedAttendance;
 
 call clean();

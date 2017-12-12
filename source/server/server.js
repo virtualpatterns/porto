@@ -40,7 +40,7 @@ Server.start = async function (address, port, staticPath, modulesPath, databaseU
       }))
 
       this.server.use((request, response, next) => {
-        Log.debug(`- ${request.method} ${request.url}`)
+        Log.debug(`- ${request.method} ${request.url} ${request.socket.remoteAddress}, ${request.header('User-Agent')}`)
         if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
         if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
         return next()

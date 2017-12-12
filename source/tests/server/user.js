@@ -47,7 +47,7 @@ describe('insertUser ...', () => {
           await connection.insertUser(name)
 
           Assert.fail()
-          
+
         } catch (error) {
           // OK
         }

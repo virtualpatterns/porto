@@ -1,0 +1,7 @@
+{
+  "globals": {
+    "desc": true,
+    "task": true,
+    "complete": true
+  }
+}

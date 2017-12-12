@@ -10,6 +10,7 @@
 /server
 /source/sandbox
 /source/www/coverage
+/tasks
 /tests
 /www
 /webpack.config.js

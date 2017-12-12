@@ -65,8 +65,8 @@ connectionPrototype.existsAttendance = async function(meetingId, userId) {
   return rows[0].existsAttendance
 }
 
-connectionPrototype.insertAttendance = async function(meetingId, userId, attended) {
-  let [ rows, ] = await this.query(this._connection.format('call insertAttendance(?, ?, ?);', [ meetingId, userId, attended ]))
+connectionPrototype.insertAttendance = async function(meetingId, userId, attended, remoteAddress, userAgent) {
+  let [ rows, ] = await this.query(this._connection.format('call insertAttendance(?, ?, ?, ?, ?);', [ meetingId, userId, attended, remoteAddress, userAgent ]))
   return rows
 }
 
