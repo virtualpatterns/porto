@@ -7,6 +7,7 @@
   "files": [
     "/library",
     "/server",
+    "/tasks",
     "/www/resources",
     "/www/scripts/bundles",
     "/www/styles",
@@ -21,6 +22,10 @@
     "url": "https://github.com/virtualpatterns/porto"
   },
   "scripts": {
+    "clean-jake": "rm -r -f ./tasks",
+    "build-jake": "npm run-script clean-jake && babel ./source/tasks --copy-files --out-dir ./tasks --quiet --source-maps inline",
+    "jake": "npm run-script build-jake && jake --jakefile ./tasks/index.js",
+    "jake-debug": "npm run-script build-jake && node --inspect ./node_modules/.bin/jake --jakefile ./tasks/index.js",
     "upgrade": "npm-check-updates --upgrade",
     "clean": "rm -r -f ./library ./sandbox ./server ./tests ./webpack.config.js ./www",
     "build": "npm run-script clean && babel ./source --copy-files --out-dir . --source-maps inline",
@@ -36,7 +41,7 @@
     "put-attendance": "http PUT http://localhost:8080/api/attendance meetingId=225 userId=71 attended:=true",
     "watch-www": "nodemon --config ./watch/www.json --on-change-only"
   },
-  "version": "0.0.10",
+  "version": "0.0.12",
   "dependencies": {
     "@material/list": "^0.26.0",
     "@material/toolbar": "^0.25.0",
@@ -68,6 +73,7 @@
     "eslint": "^4.13.0",
     "faker": "^4.1.0",
     "istanbul": "^0.4.5",
+    "jake": "^8.0.15",
     "mocha": "^4.0.1",
     "nessa": "0.0.23",
     "nodemon": "^1.12.5",
