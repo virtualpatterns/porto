@@ -50,7 +50,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
       try {
 
-        response.send(200, Attendance.toJSON(await connection.insertAttendance(request.body.meetingId, request.body.userId, request.body.attended, request.socket.remoteAddress, request.header('User-Agent'))))
+        response.send(200, Attendance.toJSON(await connection.insertAttendance(request.body.meetingId, request.body.userId, request.body.attended, request.header('X-Forwarded-For') || request.socket.remoteAddress, request.header('User-Agent'))))
         return next()
 
       }

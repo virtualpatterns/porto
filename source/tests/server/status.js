@@ -10,9 +10,16 @@ const STATUS_SCHEMA = {
   'title': 'Status',
   'type': 'object',
   'properties': {
-    'name': { 'type': 'string' },
-    'now': { 'type': 'string' },
-    'version': { 'type': 'string' },
+    'address': {
+      'name': 'Status-Address',
+      'type': 'object',
+      'properties': {
+        'remote': { 'type': 'string' },
+        'forwarded': { 'type': 'string' }
+      },
+      'required': [ 'remote', 'forwarded' ]
+    },
+    'agent': { 'type': 'string' },
     'heap': {
       'name': 'Status-Heap',
       'type': 'object',
@@ -27,9 +34,12 @@ const STATUS_SCHEMA = {
         }
       },
       'required': [ 'total', 'used' ]
-    }
+    },
+    'name': { 'type': 'string' },
+    'now': { 'type': 'string' },
+    'version': { 'type': 'string' },
   },
-  'required': [ 'name', 'now', 'version', 'heap' ],
+  'required': [ 'address', 'agent', 'heap', 'name', 'now', 'version' ],
   'additionalProperties': false,
 }
 

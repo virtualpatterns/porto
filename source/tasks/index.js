@@ -63,3 +63,5 @@ task('publish', [ 'test' ], { 'async': true }, () => {
     'git commit --message="Increment version"'
   ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
+
+require('./get')

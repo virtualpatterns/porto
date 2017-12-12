@@ -20,6 +20,12 @@ delete from batch;
 select * from batch;
 select * from deletedUser;
 select * from user;
-select * from updatedAttendance;
+select * from insertedAttendance;
 
 call clean();
+
+set @userId = 0; call insertUser(@userId, 'Jeff'); select @userId as userId;
+set @userId = 0; call insertUser(@userId, 'Frank'); select @userId as userId;
+set @userId = 0; call insertUser(@userId, 'Veronique'); select @userId as userId;
+set @userId = 0; call insertUser(@userId, 'Cristina'); select @userId as userId;
+set @userId = 0; call insertUser(@userId, 'Elsie'); select @userId as userId;

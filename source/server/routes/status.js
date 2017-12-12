@@ -17,13 +17,18 @@ Status.createRoutes = function (server) {
     let memory = Process.memoryUsage()
 
     let status = {
-      'name': Package.name,
-      'now': new Date().toISOString(),
-      'version': Package.version,
+      'address': {
+        'remote': request.socket.remoteAddress,
+        'forwarded': request.header('X-Forwarded-For') || '(none)'
+      },
+      'agent': request.header('User-Agent') || '(none)',
       'heap': {
         'total': memory.heapTotal,
         'used': memory.heapUsed
-      }
+      },
+      'name': Package.name,
+      'now': new Date().toISOString(),
+      'version': Package.version
     }
 
     response.send(status)

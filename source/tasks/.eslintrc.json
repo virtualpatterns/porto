@@ -1,7 +1,8 @@
 {
   "globals": {
     "desc": true,
-    "task": true,
-    "complete": true
+    "complete": true,
+    "namespace": true,
+    "task": true
   }
 }
