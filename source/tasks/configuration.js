@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import Jake from 'jake'
 import { Log } from 'mablung'
 
-namespace('configurations', () => {
+namespace('configuration', () => {
 
   desc('Copy default configuration')
   task('default', [], {}, () => {

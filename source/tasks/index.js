@@ -55,7 +55,7 @@ task('test', [ 'lint' ], { 'async': true }, () => {
 })
 
 desc('Publish')
-task('publish', [ 'configurations:default', 'test' ], { 'async': true }, () => {
+task('publish', [ 'configuration:default', 'test' ], { 'async': true }, () => {
   Jake.exec([
     'npm publish --access public',
     'npm --no-git-tag-version version patch',
@@ -65,4 +65,4 @@ task('publish', [ 'configurations:default', 'test' ], { 'async': true }, () => {
 })
 
 require('./methods')
-require('./configurations')
+require('./configuration')
