@@ -55,7 +55,7 @@ task('test', [ 'lint' ], { 'async': true }, () => {
 })
 
 desc('Publish')
-task('publish', [ 'test' ], { 'async': true }, () => {
+task('publish', [ 'configurations:default', 'test' ], { 'async': true }, () => {
   Jake.exec([
     'npm publish --access public',
     'npm --no-git-tag-version version patch',
@@ -64,4 +64,5 @@ task('publish', [ 'test' ], { 'async': true }, () => {
   ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
 
-require('./get')
+require('./methods')
+require('./configurations')

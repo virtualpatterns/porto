@@ -10,7 +10,7 @@ const REGEXP_STATIC = /^\/www\/(.*)$/
 Static.createRoutes = function(server, staticPath, modulesPath) {
 
   server.head('/favicon.ico', (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     return next()
   })
 
@@ -23,7 +23,7 @@ Static.createRoutes = function(server, staticPath, modulesPath) {
   })
 
   server.head('/', (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     return next()
   })
 
@@ -32,7 +32,7 @@ Static.createRoutes = function(server, staticPath, modulesPath) {
   })
 
   server.head('/www', (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     return next()
   })
 
@@ -41,7 +41,7 @@ Static.createRoutes = function(server, staticPath, modulesPath) {
   })
 
   server.head(REGEXP_MATERIAL, (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     next()
   })
 
@@ -54,7 +54,7 @@ Static.createRoutes = function(server, staticPath, modulesPath) {
   })
 
   server.head(REGEXP_STATIC, (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     next()
   })
 

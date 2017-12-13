@@ -7,6 +7,10 @@ import Template from './template'
 
 import ContentFn from './attendance.pug'
 
+const DEFAULT_CONFIGURATION = {
+  'baseUrl': ''
+}
+
 const templatePrototype = Template.getElementPrototype()
 const attendancePrototype = Object.create(templatePrototype)
 
@@ -54,7 +58,16 @@ attendancePrototype.onRefreshed = async function() {
     this.attendance = null
     this.render()
 
-    let response = await Request.get('/api/attendance')
+    let response = null
+    response = await Request.get('configuration.json')
+
+    Log.inspect('response.data', response.data)
+
+    this.configuration = response.data
+
+    response = await Request.get('/api/attendance', {
+      'baseURL': this.configuration.baseUrl
+    })
 
     Log.inspect('response.data', response.data)
 
@@ -95,6 +108,8 @@ attendancePrototype.onAttended = async function(event) {
       'meetingId': meetingId,
       'userId': userId,
       'attended': attended == '0' ? 1 : 0
+    }, {
+      'baseURL': this.configuration.baseUrl
     })
 
     Log.inspect('response.data', response.data)
@@ -118,6 +133,7 @@ Attendance.createElement = function(parentSelector = 'div.p-body', contentFn = C
 
   let element =  Template.createElement.call(this, parentSelector, contentFn, prototype)
 
+  element.configuration = DEFAULT_CONFIGURATION
   element.attendance = null
 
   return element

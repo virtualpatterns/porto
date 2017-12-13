@@ -8,7 +8,7 @@ const Status = Object.create({})
 Status.createRoutes = function (server) {
 
   server.head('/api/status', (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     return next()
   })
 

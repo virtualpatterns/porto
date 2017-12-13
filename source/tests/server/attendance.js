@@ -58,6 +58,26 @@ describe('attendance', () => {
 
     })
 
+    describe('OPTIONS', () => {
+
+      it('should respond with 200 OK', async () => {
+        Assert.equal((await Request.options('/api/attendance')).status, 200)
+      })
+
+      it('should respond with the \'Access-Control-Allow-Origin\' header', async () => {
+        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-origin'], '*')
+      })
+
+      it('should respond with the \'Access-Control-Allow-Methods\' header', async () => {
+        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, PUT, OPTIONS')
+      })
+
+      it('should respond with the \'Access-Control-Allow-Headers\' header', async () => {
+        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-headers'], 'Content-Type')
+      })
+
+    })
+
     describe('HEAD', () => {
 
       it('should respond with 200 OK', async () => {

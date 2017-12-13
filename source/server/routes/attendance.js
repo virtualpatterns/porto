@@ -8,8 +8,13 @@ const Attendance = Object.create({})
 
 Attendance.createRoutes = function(server, databaseUrl) {
 
+  server.opts('/api/attendance', (request, response, next) => {
+    response.send(200, {})
+    return next()
+  })
+
   server.head('/api/attendance', (request, response, next) => {
-    response.send(200)
+    response.send(200, {})
     return next()
   })
 

@@ -43,7 +43,13 @@ Server.start = async function (address, port, staticPath, modulesPath, databaseU
         Log.debug(`- ${request.method} ${request.url} ${request.header('X-Forwarded-For') || request.socket.remoteAddress} ${request.header('User-Agent')}`)
         if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
         if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
+
+        response.header('Access-Control-Allow-Origin', '*')
+        response.header('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS')
+        response.header('Access-Control-Allow-Headers', 'Content-Type')
+
         return next()
+
       })
 
       Attendance.createRoutes(this.server, databaseUrl)

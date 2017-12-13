@@ -14,3 +14,12 @@ namespace('get', () => {
   })
 
 })
+
+namespace('options', () => {
+
+  desc('OPTIONS /api/attendance')
+  task('attendance', [], {}, () => {
+    Jake.exec([ 'http OPTIONS http://localhost:8080/api/attendance' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+  })
+
+})
