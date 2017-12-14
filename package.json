@@ -7,7 +7,7 @@
   "files": [
     "/library",
     "/server",
-    "/tasks",
+    "/www/configurations",
     "/www/resources",
     "/www/scripts/bundles",
     "/www/styles",
