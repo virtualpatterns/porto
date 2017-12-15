@@ -34,7 +34,7 @@
     "put-attendance": "http PUT http://localhost:8080/api/attendance meetingId=225 userId=71 attended:=true",
     "watch-www": "nodemon --config ./watch/www.json --on-change-only"
   },
-  "version": "0.0.24",
+  "version": "0.0.25",
   "dependencies": {
     "@material/list": "^0.26.0",
     "@material/toolbar": "^0.25.0",
