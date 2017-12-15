@@ -3,13 +3,13 @@
 *.err
 *.log
 *.out
+/coverage
 /library
 /node_modules
 /process
 /sandbox
 /server
 /source/sandbox
-/source/www/coverage
 /tasks
 /tests
 /www

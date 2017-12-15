@@ -1,4 +1,4 @@
-import RESTErrors from 'restify-errors'
+// import RESTErrors from 'restify-errors'
 import { Process } from 'mablung'
 
 import Package from '../../package.json'
@@ -36,9 +36,9 @@ Status.createRoutes = function (server) {
 
   })
 
-  server.head('/api/error', (request, response, next) => {
-    return next(new RESTErrors.InternalServerError('server.head(\'/api/error\', (request, response, next) => { ... })'))
-  })
+  // server.head('/api/error', (request, response, next) => {
+  //   return next(new RESTErrors.InternalServerError('server.head(\'/api/error\', (request, response, next) => { ... })'))
+  // })
 
 }
 

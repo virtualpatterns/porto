@@ -51,7 +51,7 @@ desc('Test the server and client')
 task('test', [ 'lint' ], { 'async': true }, () => {
   Log.debug('- Testing ...')
   Jake.rmRf('/var/log/porto/porto.test.log', { 'silent': true })
-  Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www" istanbul cover ./node_modules/.bin/_mocha --dir ./source/www/coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+  Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
 
 desc('Publish')
