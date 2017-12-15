@@ -104,7 +104,7 @@ attendancePrototype.onAttended = async function(event) {
 
     this.render()
 
-    let response = await Request.put('/api/attendance', {
+    let response = await Request.post('/api/attendance', {
       'meetingId': meetingId,
       'userId': userId,
       'attended': attended == '0' ? 1 : 0

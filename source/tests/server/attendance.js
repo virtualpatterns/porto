@@ -69,7 +69,7 @@ describe('attendance', () => {
       })
 
       it('should respond with the \'Access-Control-Allow-Methods\' header', async () => {
-        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, PUT, OPTIONS')
+        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, POST, OPTIONS')
       })
 
       it('should respond with the \'Access-Control-Allow-Headers\' header', async () => {
@@ -266,7 +266,7 @@ describe('attendance', () => {
 
     })
 
-    describe('PUT', () => {
+    describe('POST', () => {
 
       describe('(when the meeting does not exist)', () => {
 
@@ -281,7 +281,7 @@ describe('attendance', () => {
 
           try {
 
-            await Request.put('/api/attendance', {
+            await Request.post('/api/attendance', {
               'meetingId': 0,
               'userId': userId,
               'attended': false
@@ -314,7 +314,7 @@ describe('attendance', () => {
 
           try {
 
-            await Request.put('/api/attendance', {
+            await Request.post('/api/attendance', {
               'meetingId': meetingId,
               'userId': 0,
               'attended': false
@@ -345,7 +345,7 @@ describe('attendance', () => {
           meetingId = await connection.insertMeeting(weekOf)
           userId = await connection.insertUser(name)
 
-          let response = await Request.put('/api/attendance', {
+          let response = await Request.post('/api/attendance', {
             'meetingId': meetingId,
             'userId': userId,
             'attended': false
@@ -398,7 +398,7 @@ describe('attendance', () => {
 
           await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
 
-          let response = await Request.put('/api/attendance', {
+          let response = await Request.post('/api/attendance', {
             'meetingId': meetingId,
             'userId': userId,
             'attended': true

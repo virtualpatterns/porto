@@ -47,7 +47,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
   })
 
-  server.put('/api/attendance', async (request, response, next) => {
+  server.post('/api/attendance', async (request, response, next) => {
 
     try {
 
@@ -66,7 +66,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
     }
     catch (error) {
 
-      Log.error('- server.put(\'/api/attendance\', (request, response, next) => { ... })')
+      Log.error('- server.post(\'/api/attendance\', (request, response, next) => { ... })')
       Log.error(`    error.message='${error.message}'`)
       Log.error(`    error.stack ...\n\n${error.stack}\n`)
 
