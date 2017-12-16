@@ -88,6 +88,35 @@ describe('attendance', () => {
 
     describe('GET', () => {
 
+      describe('(when the procedure getAttendance does not exist)', () => {
+
+        let fromName = 'getAttendance'
+        let toName = `_get${Faker.database.column()}`
+
+        before(async () => {
+          await connection.renameProcedure(fromName, toName)
+        })
+
+        it('should throw an error', async () => {
+
+          try {
+
+            await Request.get('/api/attendance')
+
+            Assert.fail()
+
+          } catch (error) {
+            // OK
+          }
+
+        })
+
+        after(async () => {
+          await connection.renameProcedure(toName, fromName)
+        })
+
+      })
+
       describe('(when no users exist)', () => {
 
         let meetingId = null

@@ -95,6 +95,10 @@ connectionPrototype.getAttendance = async function(...parameters) {
 
 }
 
+connectionPrototype.renameProcedure = async function(fromName, toName) {
+  await this.query(this._connection.format('call renameProcedure(?, ?);', [ fromName, toName ]))
+}
+
 connectionPrototype.close = async function() {
 
   await this._connection.end()
