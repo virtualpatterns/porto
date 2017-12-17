@@ -5,6 +5,7 @@
   },
   "description": "TBD",
   "files": [
+    "/deployment",
     "/library",
     "/server",
     "/www/configurations",
@@ -24,7 +25,7 @@
   "scripts": {
     "clean-jake": "rm -r -f ./tasks",
     "build-jake": "npm run-script clean-jake && babel ./source/tasks --copy-files --out-dir ./tasks --quiet --source-maps inline",
-    "jake": "npm run-script build-jake && jake --jakefile ./tasks/index.js",
+    "jake": "npm run-script build-jake && jake --jakefile ./tasks/index.js --trace",
     "tasks": "npm run-script build-jake && jake --jakefile ./tasks/index.js --tasks",
     "upgrade": "npm-check-updates --upgrade",
     "run-debug": "rm -f /var/log/porto/porto.log && npm run-script bundle && node --inspect server/index.js run --databaseUrl mysql://porto:porto@localhost/porto?debug=true --logPath /var/log/porto/porto.log",
@@ -71,6 +72,7 @@
     "nessa": "0.0.23",
     "nodemon": "^1.12.5",
     "npm-check-updates": "^2.13.0",
+    "pm2": "^2.9.1",
     "puppeteer": "^0.13.0",
     "webpack": "^3.10.0",
     "webpack-monitor": "^1.0.14"

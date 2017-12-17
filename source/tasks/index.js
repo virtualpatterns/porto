@@ -12,9 +12,11 @@ Jake.addListener('complete', () => {
   Log.removeConsole()
 })
 
-desc('Remove built folders/files')
+desc('Remove built and bundled folders/files')
 task('clean', [], {}, () => {
 
+  Jake.rmRf('deployment/s3', { 'silent': true })
+  Jake.mkdirP('deployment/s3', { 'silent': true })
   Jake.rmRf('library', { 'silent': true })
   Jake.rmRf('sandbox', { 'silent': true })
   Jake.rmRf('server', { 'silent': true })
@@ -24,28 +26,27 @@ task('clean', [], {}, () => {
 
 })
 
-desc('Build folders/files')
+desc('Build files')
 task('build', [ 'clean' ], { 'async': true }, () => {
   Log.debug('- Building ...')
   Jake.exec([ 'babel ./source --copy-files --out-dir . --quiet --source-maps inline' ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
 
-desc('Bundle folders/files')
+desc('Bundle files')
 task('bundle', [ 'build' ], { 'async': true }, () => {
   Log.debug('- Bundling ...')
   Jake.exec([ 'webpack' ], { 'printStderr': true, 'printStdout': false }, () => complete())
 })
 
-desc('Lint folders/files')
+desc('Lint files')
 task('lint', [ 'bundle' ], { 'async': true }, () => {
   Log.debug('- Linting ...')
   Jake.exec([ 'eslint --ignore-path .gitignore ./source' ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
 
-desc('Run server')
-task('run', [ 'bundle' ], { 'async': true }, () => {
-  Jake.exec([ 'node ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto.log' ], { 'printStderr': true, 'printStdout': true }, () => complete())
-})
+require('./configuration')
+require('./process')
+require('./http')
 
 desc('Test the server and client')
 task('test', [ 'lint' ], { 'async': true }, () => {
@@ -54,8 +55,66 @@ task('test', [ 'lint' ], { 'async': true }, () => {
   Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
 
-desc('Publish')
-task('publish', [ 'configuration:default', 'test' ], { 'async': true }, () => {
+desc('Generate the static site')
+task('generate', [ 'test' ], { 'async': true }, () => {
+
+  let serverStart = Jake.Task['server:start']
+
+  serverStart.addListener('error', (error) => Log.inspect('error', error))
+  serverStart.addListener('complete', () => {
+
+    let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --mirror http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ])
+    wget.addListener('error', (message, code) => {
+
+      Log.error(`- ${message} (${code})`)
+
+      let serverStop = Jake.Task['server:stop']
+
+      serverStop.addListener('error', (error) => Log.inspect('error', error))
+      serverStop.addListener('complete', () => complete())
+
+      serverStop.invoke()
+
+    })
+    wget.addListener('cmdEnd', () => {
+
+      let serverStop = Jake.Task['server:stop']
+
+      serverStop.addListener('error', (error) => Log.inspect('error', error))
+      serverStop.addListener('complete', () => complete())
+
+      serverStop.invoke()
+
+    })
+
+    wget.run()
+
+    // Jake.exec([ 'echo wget --directory-prefix=deployment/s3 --mirror --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ], { 'printStderr': true, 'printStdout': true }, () => {
+    //
+    //   let serverStop = Jake.Task['server:stop']
+    //
+    //   serverStop.addListener('error', (error) => Log.inspect('error', error))
+    //   serverStop.addListener('complete', () => complete())
+    //
+    //   serverStop.invoke()
+    //
+    // })
+
+  })
+
+  serverStart.invoke()
+
+  // Jake.exec([
+  //   'npm run-script jake server:start',
+  //   'rm -rf ./deployment/static/*',
+  //   'wget --directory-prefix=./deployment/static --mirror --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json',
+  //   'npm run-script jake server:stop'
+  // ], { 'printStderr': true, 'printStdout': true }, () => complete())
+
+})
+
+desc('Publish package')
+task('publish', [ 'configuration:default', 'generate' ], { 'async': true }, () => {
   Jake.exec([
     'npm publish --access public',
     'npm --no-git-tag-version version patch',
@@ -63,6 +122,3 @@ task('publish', [ 'configuration:default', 'test' ], { 'async': true }, () => {
     'git commit --message="Increment version"'
   ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
-
-require('./methods')
-require('./configuration')

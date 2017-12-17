@@ -4,6 +4,12 @@ import { Log } from 'mablung'
 
 namespace('configuration', () => {
 
+  desc('Copy default configuration')
+  task('default', [], {}, () => {
+    Log.debug('- Copying default configuration ...')
+    Jake.cpR('./source/www/configurations/default.json', './source/www/configuration.json', { 'silent': true })
+  })
+
   desc('Copy 0.0.0.0 configuration')
   task('0.0.0.0', [], {}, () => {
     Log.debug('- Copying 0.0.0.0 configuration ...')
@@ -16,10 +22,10 @@ namespace('configuration', () => {
     Jake.cpR('./source/www/configurations/anonymouse.json', './source/www/configuration.json', { 'silent': true })
   })
 
-  desc('Copy default configuration')
-  task('default', [], {}, () => {
-    Log.debug('- Copying default configuration ...')
-    Jake.cpR('./source/www/configurations/default.json', './source/www/configuration.json', { 'silent': true })
+  desc('Copy static configuration')
+  task('static', [], {}, () => {
+    Log.debug('- Copying static configuration ...')
+    Jake.cpR('./source/www/configurations/static.json', './source/www/configuration.json', { 'silent': true })
   })
 
 })
