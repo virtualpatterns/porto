@@ -74,7 +74,8 @@ Command
 
       })
 
-      await Server.start( options.address || ADDRESS,
+      await Server.start(
+        options.address || ADDRESS,
         options.port || PORT,
         options.staticPath || STATIC_PATH,
         options.modulesPath || MODULES_PATH,

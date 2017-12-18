@@ -1,6 +1,9 @@
 import 'babel-polyfill'
 import Jake from 'jake'
+// import { Log, Path } from 'mablung'
 import { Log } from 'mablung'
+
+// import Server from '../server/server'
 
 Jake.addListener('start', () => {
   Log.addConsole()
@@ -58,12 +61,32 @@ task('test', [ 'lint' ], { 'async': true }, () => {
 desc('Generate the static site')
 task('generate', [ 'test' ], { 'async': true }, () => {
 
+  // await Server.start(
+  //   '0.0.0.0',
+  //   8080,
+  //   Path.join(__dirname, '../www'),
+  //   Path.join(__dirname, '../node_modules'),
+  //   'mysql://porto:porto@localhost/porto')
+  //
+  // Jake.exec([ 'wget --directory-prefix=deployment/s3 --mirror --no-verbose http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ], { 'printStderr': true, 'printStdout': true }, async () => {
+  //   await Server.stop()
+  //   complete()
+  // })
+
   let serverStart = Jake.Task['server:start']
 
   serverStart.addListener('error', (error) => Log.inspect('error', error))
   serverStart.addListener('complete', () => {
 
-    let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --mirror http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ])
+    Log.debug('- Generating ...')
+
+    let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --execute robots=off --mirror --no-verbose --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ])
+    wget.addListener('stdout', (data) => {
+      Log.debug(`- ${data}`)
+    })
+    wget.addListener('stderr', (data) => {
+      Log.error(`- ${data}`)
+    })
     wget.addListener('error', (message, code) => {
 
       Log.error(`- ${message} (${code})`)
@@ -89,27 +112,9 @@ task('generate', [ 'test' ], { 'async': true }, () => {
 
     wget.run()
 
-    // Jake.exec([ 'echo wget --directory-prefix=deployment/s3 --mirror --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ], { 'printStderr': true, 'printStdout': true }, () => {
-    //
-    //   let serverStop = Jake.Task['server:stop']
-    //
-    //   serverStop.addListener('error', (error) => Log.inspect('error', error))
-    //   serverStop.addListener('complete', () => complete())
-    //
-    //   serverStop.invoke()
-    //
-    // })
-
   })
 
   serverStart.invoke()
-
-  // Jake.exec([
-  //   'npm run-script jake server:start',
-  //   'rm -rf ./deployment/static/*',
-  //   'wget --directory-prefix=./deployment/static --mirror --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json',
-  //   'npm run-script jake server:stop'
-  // ], { 'printStderr': true, 'printStdout': true }, () => complete())
 
 })
 

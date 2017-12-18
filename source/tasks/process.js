@@ -1,5 +1,6 @@
 import 'babel-polyfill'
 import Jake from 'jake'
+import { Log } from 'mablung'
 
 namespace('server', () => {
 
@@ -10,11 +11,13 @@ namespace('server', () => {
 
   desc('Start server')
   task('start', [ 'bundle' ], { 'async': true }, () => {
+    Log.debug('- Starting ...')
     Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-server-8080.log --port 8080' ], { 'printStderr': true, 'printStdout': true }, () => setTimeout(() => complete(), 5000))
   })
 
   desc('Stop server')
   task('stop', [], { 'async': true }, () => {
+    Log.debug('- Stopping ...')
     Jake.exec([
       'pm2 stop porto-server-8080 --silent',
       'pm2 delete porto-server-8080 --silent'
@@ -40,11 +43,13 @@ namespace('proxy', () => {
 
   desc('Start HAProxy')
   task('start', [], { 'async': true }, () => {
+    Log.debug('- Starting ...')
     Jake.exec([ 'sudo haproxy -D -f ./deployment/haproxy.cfg' ], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
   desc('Stop HAProxy')
   task('stop', [], { 'async': true }, () => {
+    Log.debug('- Stopping ...')
     Jake.exec([ 'sudo kill $(cat /var/run/haproxy.pid)' ], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
