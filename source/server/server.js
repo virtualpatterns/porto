@@ -10,10 +10,10 @@ import Status from './routes/status'
 
 const Server = Object.create({})
 
-Server.start = async function (address, port, staticPath, modulesPath, databaseUrl) {
+Server.start = function (address, port, staticPath, modulesPath, databaseUrl) {
   Log.debug(`- Server.start('${address}', ${port}, '${Path.trim(staticPath)}', '${Path.trim(modulesPath)}', '${databaseUrl}')`)
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
 
     try {
 
@@ -57,7 +57,6 @@ Server.start = async function (address, port, staticPath, modulesPath, databaseU
       Status.createRoutes(this.server)
 
       this.server.listen(port, address, () => {
-        // Log.debug(`- this.server.listen(${port}, '${address}', () => { ... })`)
         resolve()
       })
 
@@ -70,7 +69,7 @@ Server.start = async function (address, port, staticPath, modulesPath, databaseU
 
 }
 
-Server.stop = async function () {
+Server.stop = function () {
   Log.debug('- Server.stop()')
 
   return new Promise((resolve, reject) => {

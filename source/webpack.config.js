@@ -1,5 +1,4 @@
 import WebPack from 'webpack'
-import WebPackMonitor from 'webpack-monitor'
 
 module.exports = {
   'devtool': 'eval-source-map',
@@ -18,11 +17,6 @@ module.exports = {
     'path': `${__dirname}/www/scripts/bundles`
   },
   plugins: [
-    new WebPack.IgnorePlugin(/^winston|\.\/process$/),
-    new WebPackMonitor({
-      'capture': true,
-      'target': `${__dirname}/www/scripts/bundles/monitor.json`,
-      'launch': false
-    }),
+    new WebPack.IgnorePlugin(/^winston|\.\/process$/)
   ]
 }

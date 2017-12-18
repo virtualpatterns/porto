@@ -9,155 +9,164 @@ import Server from '../../server/server'
 
 describe('/www/index.html', () => {
 
-  let connection = null
+  let staticPaths = Process.env.STATIC_PATH.split(':')
+  staticPaths.forEach((staticPath) => {
 
-  let browser = null
-  let page = null
+    describe(`(when the static path is '${staticPath}')`, () => {
 
-  before(async () => {
+      let connection = null
 
-    connection = await Database.open(Process.env.DATABASE_URL)
-
-    await Server.start(
-      Process.env.ADDRESS,
-      Process.env.PORT,
-      Process.env.STATIC_PATH,
-      Process.env.MODULES_PATH,
-      Process.env.DATABASE_URL)
-
-    browser = await Puppeteer.launch()
-    page = await browser.newPage()
-
-    await page.goto(`http://${Process.env.ADDRESS}:${Process.env.PORT}`)
-
-    // await page.screenshot({ 'path': 'porto.png' })
-
-  })
-
-  it('should show the next meeting date', async () => {
-
-    let weekOf = Moment()
-    let nextMeetingOn = await connection.nextMeetingOn(weekOf)
-
-    Assert.equal(await page.evaluate(() => document.querySelector('span.mdc-toolbar__title').innerText), nextMeetingOn.format('ddd MMM D'))
-
-  })
-
-  it('should show the refresh link', async () => {
-    Assert.ok(await page.evaluate(() => document.querySelector('a.p-refresh')))
-  })
-
-  describe('(when refreshed)', () => {
-
-    let userId = null
-
-    let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-    let nameBefore = `Aa ${name}`
-    let nameAfter = `Zz ${name}`
-
-    before(async () => {
-
-      userId = await connection.insertUser(name)
-      await connection.insertUser(nameBefore)
-      await connection.insertUser(nameAfter)
-
-      await page.tap('a.p-refresh')
-      await page.waitForSelector('div.p-overlay.p-overlay-hidden')
-
-    })
-
-    it('should show the inserted user', async () => {
-
-      Assert.equal(await page.evaluate((userId) => {
-
-        return Array.from(document.querySelectorAll('span.mdc-list-item__text'))
-          .filter((element) => element['data-user-id'] == userId)
-          .reduce((accumulator, element) => element.innerText, null)
-
-      }, userId), name)
-
-    })
-
-    it('should show the inserted user as not attended', async () => {
-
-      Assert.equal(await page.evaluate((userId) => {
-
-        return Array.from(document.querySelectorAll('a.p-attendee'))
-          .filter((element) => element['data-user-id'] == userId)
-          .reduce((accumulator, element) => element.innerText, null)
-
-      }, userId), 'clear')
-
-    })
-
-    it('attendance should be not attended for the inserted user', async () => {
-      Assert.equal((await connection.getAttendance())
-        .filter((row) => row.userId == userId)
-        .reduce((accumulator, row) => row.attended, false), false)
-    })
-
-    describe('(when attended)', () => {
+      let browser = null
+      let page = null
 
       before(async () => {
 
-        let elements = await page.$$('a.p-attendee')
-        let element = null
+        connection = await Database.open(Process.env.DATABASE_URL)
 
-        for (let _element of elements) {
+        await Server.start(
+          Process.env.ADDRESS,
+          Process.env.PORT,
+          staticPath,
+          Process.env.MODULES_PATH,
+          Process.env.DATABASE_URL)
 
-          let _handle = await _element.getProperty('data-user-id')
-          let _userId = await _handle.jsonValue()
+        browser = await Puppeteer.launch()
+        page = await browser.newPage()
 
-          if (_userId == userId) {
-            element = _element
-            break
-          }
+        await page.goto(`http://${Process.env.ADDRESS}:${Process.env.PORT}`)
 
-        }
+        // await page.screenshot({ 'path': 'porto.png' })
 
-        if (element) {
-          await element.tap()
+      })
+
+      it('should show the next meeting date', async () => {
+
+        let weekOf = Moment()
+        let nextMeetingOn = await connection.nextMeetingOn(weekOf)
+
+        Assert.equal(await page.evaluate(() => document.querySelector('span.mdc-toolbar__title').innerText), nextMeetingOn.format('ddd MMM D'))
+
+      })
+
+      it('should show the refresh link', async () => {
+        Assert.ok(await page.evaluate(() => document.querySelector('a.p-refresh')))
+      })
+
+      describe('(when refreshed)', () => {
+
+        let userId = null
+
+        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+        let nameBefore = `Aa ${name}`
+        let nameAfter = `Zz ${name}`
+
+        before(async () => {
+
+          userId = await connection.insertUser(name)
+          await connection.insertUser(nameBefore)
+          await connection.insertUser(nameAfter)
+
+          await page.tap('a.p-refresh')
           await page.waitForSelector('div.p-overlay.p-overlay-hidden')
-        }
+
+        })
+
+        it('should show the inserted user', async () => {
+
+          Assert.equal(await page.evaluate((userId) => {
+
+            return Array.from(document.querySelectorAll('span.mdc-list-item__text'))
+              .filter((element) => element['data-user-id'] == userId)
+              .reduce((accumulator, element) => element.innerText, null)
+
+          }, userId), name)
+
+        })
+
+        it('should show the inserted user as not attended', async () => {
+
+          Assert.equal(await page.evaluate((userId) => {
+
+            return Array.from(document.querySelectorAll('a.p-attendee'))
+              .filter((element) => element['data-user-id'] == userId)
+              .reduce((accumulator, element) => element.innerText, null)
+
+          }, userId), 'clear')
+
+        })
+
+        it('attendance should be not attended for the inserted user', async () => {
+          Assert.equal((await connection.getAttendance())
+            .filter((row) => row.userId == userId)
+            .reduce((accumulator, row) => row.attended, false), false)
+        })
+
+        describe('(when attended)', () => {
+
+          before(async () => {
+
+            let elements = await page.$$('a.p-attendee')
+            let element = null
+
+            for (let _element of elements) {
+
+              let _handle = await _element.getProperty('data-user-id')
+              let _userId = await _handle.jsonValue()
+
+              if (_userId == userId) {
+                element = _element
+                break
+              }
+
+            }
+
+            if (element) {
+              await element.tap()
+              await page.waitForSelector('div.p-overlay.p-overlay-hidden')
+            }
+
+          })
+
+          it('should show the inserted user as attended', async () => {
+
+            Assert.equal(await page.evaluate((userId) => {
+
+              return Array.from(document.querySelectorAll('a.p-attendee'))
+                .filter((element) => element['data-user-id'] == userId)
+                .reduce((accumulator, element) => element.innerText, null)
+
+            }, userId), 'done')
+
+          })
+
+          it('attendance should be attended for the inserted user', async () => {
+            Assert.equal((await connection.getAttendance())
+              .filter((row) => row.userId == userId)
+              .reduce((accumulator, row) => row.attended, false), true)
+          })
+
+        })
+
+        after(async () => {
+
+          await connection.deleteUser(name)
+          await connection.deleteUser(nameBefore)
+          await connection.deleteUser(nameAfter)
+
+        })
 
       })
 
-      it('should show the inserted user as attended', async () => {
+      after(async () => {
 
-        Assert.equal(await page.evaluate((userId) => {
+        await browser.close()
 
-          return Array.from(document.querySelectorAll('a.p-attendee'))
-            .filter((element) => element['data-user-id'] == userId)
-            .reduce((accumulator, element) => element.innerText, null)
+        await Server.stop()
+        await connection.close()
 
-        }, userId), 'done')
-
-      })
-
-      it('attendance should be attended for the inserted user', async () => {
-        Assert.equal((await connection.getAttendance())
-          .filter((row) => row.userId == userId)
-          .reduce((accumulator, row) => row.attended, false), true)
       })
 
     })
-
-    after(async () => {
-
-      await connection.deleteUser(name)
-      await connection.deleteUser(nameBefore)
-      await connection.deleteUser(nameAfter)
-
-    })
-
-  })
-
-  after(async () => {
-
-    await browser.close()
-
-    await Server.stop()
-    await connection.close()
 
   })
 

@@ -43,434 +43,440 @@ describe('attendance', () => {
 
   describe('/api/attendance', () => {
 
-    let connection = null
+    let staticPath = Process.env.STATIC_PATH.split(':')[0]
 
-    before(async () => {
+    describe(`(when the static path is '${staticPath}')`, () => {
 
-      connection = await Database.open(Process.env.DATABASE_URL)
+      let connection = null
 
-      await Server.start(
-        Process.env.ADDRESS,
-        Process.env.PORT,
-        Process.env.STATIC_PATH,
-        Process.env.MODULES_PATH,
-        Process.env.DATABASE_URL)
+      before(async () => {
 
-    })
+        connection = await Database.open(Process.env.DATABASE_URL)
 
-    describe('OPTIONS', () => {
+        await Server.start(
+          Process.env.ADDRESS,
+          Process.env.PORT,
+          staticPath,
+          Process.env.MODULES_PATH,
+          Process.env.DATABASE_URL)
 
-      it('should respond with 200 OK', async () => {
-        Assert.equal((await Request.options('/api/attendance')).status, 200)
       })
 
-      it('should respond with the \'Access-Control-Allow-Origin\' header', async () => {
-        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-origin'], '*')
-      })
+      describe('OPTIONS', () => {
 
-      it('should respond with the \'Access-Control-Allow-Methods\' header', async () => {
-        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, POST, OPTIONS')
-      })
-
-      it('should respond with the \'Access-Control-Allow-Headers\' header', async () => {
-        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-headers'], 'Content-Type')
-      })
-
-    })
-
-    describe('HEAD', () => {
-
-      it('should respond with 200 OK', async () => {
-        Assert.equal((await Request.head('/api/attendance')).status, 200)
-      })
-
-    })
-
-    describe('GET', () => {
-
-      describe('(when the procedure getAttendance does not exist)', () => {
-
-        let fromName = 'getAttendance'
-        let toName = `_get${Faker.database.column()}`
-
-        before(async () => {
-          await connection.renameProcedure(fromName, toName)
+        it('should respond with 200 OK', async () => {
+          Assert.equal((await Request.options('/api/attendance')).status, 200)
         })
 
-        it('should throw an error', async () => {
-
-          try {
-
-            await Request.get('/api/attendance')
-
-            Assert.fail()
-
-          } catch (error) {
-            // OK
-          }
-
+        it('should respond with the \'Access-Control-Allow-Origin\' header', async () => {
+          Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-origin'], '*')
         })
 
-        after(async () => {
-          await connection.renameProcedure(toName, fromName)
+        it('should respond with the \'Access-Control-Allow-Methods\' header', async () => {
+          Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, POST, OPTIONS')
+        })
+
+        it('should respond with the \'Access-Control-Allow-Headers\' header', async () => {
+          Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-headers'], 'Content-Type')
         })
 
       })
 
-      describe('(when no users exist)', () => {
+      describe('HEAD', () => {
 
-        let meetingId = null
-        let weekOf = Moment()
-
-        let attendance = null
-
-        before(async () => {
-
-          meetingId = await connection.insertMeeting(weekOf)
-          await connection.deleteAllUsers()
-
-          attendance = (await Request.get('/api/attendance')).data
-
-        })
-
-        it('should be valid', async () => {
-          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
-        })
-
-        it('should respond with this meeting', async () => {
-          Assert.equal(attendance.meetingId, meetingId)
-        })
-
-        it('should respond with 0 attendees', async () => {
-          Assert.equal(attendance.attendees
-            .length, 0)
-        })
-
-        after(async () => {
-          await connection.restoreAllUsers()
+        it('should respond with 200 OK', async () => {
+          Assert.equal((await Request.head('/api/attendance')).status, 200)
         })
 
       })
 
-      describe('(when the attendance does not exist)', () => {
+      describe('GET', () => {
 
-        let meetingId = null
-        let weekOf = Moment()
+        describe('(when the procedure getAttendance does not exist)', () => {
 
-        let userId = null
-        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+          let fromName = 'getAttendance'
+          let toName = `_get${Faker.database.column()}`
 
-        let attendance = null
+          before(async () => {
+            await connection.renameProcedure(fromName, toName)
+          })
 
-        before(async () => {
+          it('should throw an error', async () => {
 
-          meetingId = await connection.insertMeeting(weekOf)
-          userId = await connection.insertUser(name)
+            try {
 
-          attendance = (await Request.get('/api/attendance')).data
+              await Request.get('/api/attendance')
+
+              Assert.fail()
+
+            } catch (error) {
+              // OK
+            }
+
+          })
+
+          after(async () => {
+            await connection.renameProcedure(toName, fromName)
+          })
 
         })
 
-        it('should be valid', async () => {
-          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+        describe('(when no users exist)', () => {
+
+          let meetingId = null
+          let weekOf = Moment()
+
+          let attendance = null
+
+          before(async () => {
+
+            meetingId = await connection.insertMeeting(weekOf)
+            await connection.deleteAllUsers()
+
+            attendance = (await Request.get('/api/attendance')).data
+
+          })
+
+          it('should be valid', async () => {
+            Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+          })
+
+          it('should respond with this meeting', async () => {
+            Assert.equal(attendance.meetingId, meetingId)
+          })
+
+          it('should respond with 0 attendees', async () => {
+            Assert.equal(attendance.attendees
+              .length, 0)
+          })
+
+          after(async () => {
+            await connection.restoreAllUsers()
+          })
+
         })
 
-        it('should respond with this meeting', async () => {
-          Assert.equal(attendance.meetingId, meetingId)
+        describe('(when the attendance does not exist)', () => {
+
+          let meetingId = null
+          let weekOf = Moment()
+
+          let userId = null
+          let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+          let attendance = null
+
+          before(async () => {
+
+            meetingId = await connection.insertMeeting(weekOf)
+            userId = await connection.insertUser(name)
+
+            attendance = (await Request.get('/api/attendance')).data
+
+          })
+
+          it('should be valid', async () => {
+            Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+          })
+
+          it('should respond with this meeting', async () => {
+            Assert.equal(attendance.meetingId, meetingId)
+          })
+
+          it('should respond with one row for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .length, 1)
+          })
+
+          it('should respond with not attended for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .reduce((accumulator, attendee) => attendee.attended, false), false)
+          })
+
+          after(async () => {
+            await connection.deleteUser(name)
+          })
+
         })
 
-        it('should respond with one row for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .length, 1)
+        describe('(when the attendance exists as not attended)', () => {
+
+          let meetingId = null
+          let weekOf = Moment()
+
+          let userId = null
+          let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+          let attendance = null
+
+          before(async () => {
+
+            meetingId = await connection.insertMeeting(weekOf)
+            userId = await connection.insertUser(name)
+
+            await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
+
+            attendance = (await Request.get('/api/attendance')).data
+
+          })
+
+          it('should be valid', async () => {
+            Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+          })
+
+          it('should respond with this meeting', async () => {
+            Assert.equal(attendance.meetingId, meetingId)
+          })
+
+          it('should respond with one row for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .length, 1)
+          })
+
+          it('should respond with not attended for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .reduce((accumulator, attendee) => attendee.attended, false), false)
+          })
+
+          after(async () => {
+            await connection.deleteAttendance(meetingId, userId)
+            await connection.deleteUser(name)
+          })
+
         })
 
-        it('should respond with not attended for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .reduce((accumulator, attendee) => attendee.attended, false), false)
-        })
+        describe('(when the attendance exists as attended)', () => {
 
-        after(async () => {
-          await connection.deleteUser(name)
+          let meetingId = null
+          let weekOf = Moment()
+
+          let userId = null
+          let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+
+          let attendance = null
+
+          before(async () => {
+
+            meetingId = await connection.insertMeeting(weekOf)
+            userId = await connection.insertUser(name)
+
+            await connection.insertAttendance(meetingId, userId, true, REMOTE_ADDRESS, USER_AGENT)
+
+            attendance = (await Request.get('/api/attendance')).data
+
+          })
+
+          it('should be valid', async () => {
+            Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+          })
+
+          it('should respond with this meeting', async () => {
+            Assert.equal(attendance.meetingId, meetingId)
+          })
+
+          it('should respond with one row for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .length, 1)
+          })
+
+          it('should respond with attended for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .reduce((accumulator, attendee) => attendee.attended, false), true)
+          })
+
+          after(async () => {
+            await connection.deleteAttendance(meetingId, userId)
+            await connection.deleteUser(name)
+          })
+
         })
 
       })
 
-      describe('(when the attendance exists as not attended)', () => {
+      describe('POST', () => {
 
-        let meetingId = null
-        let weekOf = Moment()
+        describe('(when the meeting does not exist)', () => {
 
-        let userId = null
-        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
+          let userId = null
+          let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
-        let attendance = null
+          before(async () => {
+            userId = await connection.insertUser(name)
+          })
 
-        before(async () => {
+          it('should throw an error', async () => {
 
-          meetingId = await connection.insertMeeting(weekOf)
-          userId = await connection.insertUser(name)
+            try {
 
-          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
+              await Request.post('/api/attendance', {
+                'meetingId': 0,
+                'userId': userId,
+                'attended': false
+              })
 
-          attendance = (await Request.get('/api/attendance')).data
+              Assert.fail()
 
-        })
+            } catch (error) {
+              // OK
+            }
 
-        it('should be valid', async () => {
-          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
-        })
+          })
 
-        it('should respond with this meeting', async () => {
-          Assert.equal(attendance.meetingId, meetingId)
-        })
-
-        it('should respond with one row for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .length, 1)
-        })
-
-        it('should respond with not attended for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .reduce((accumulator, attendee) => attendee.attended, false), false)
-        })
-
-        after(async () => {
-          await connection.deleteAttendance(meetingId, userId)
-          await connection.deleteUser(name)
-        })
-
-      })
-
-      describe('(when the attendance exists as attended)', () => {
-
-        let meetingId = null
-        let weekOf = Moment()
-
-        let userId = null
-        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-        let attendance = null
-
-        before(async () => {
-
-          meetingId = await connection.insertMeeting(weekOf)
-          userId = await connection.insertUser(name)
-
-          await connection.insertAttendance(meetingId, userId, true, REMOTE_ADDRESS, USER_AGENT)
-
-          attendance = (await Request.get('/api/attendance')).data
+          after(async () => {
+            await connection.deleteUser(name)
+          })
 
         })
 
-        it('should be valid', async () => {
-          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+        describe('(when the user does not exist)', () => {
+
+          let meetingId = null
+          let weekOf = Moment()
+
+          before(async () => {
+            meetingId = await connection.insertMeeting(weekOf)
+          })
+
+          it('should throw an error', async () => {
+
+            try {
+
+              await Request.post('/api/attendance', {
+                'meetingId': meetingId,
+                'userId': 0,
+                'attended': false
+              })
+
+              Assert.fail()
+
+            } catch (error) {
+              // OK
+            }
+
+          })
+
         })
 
-        it('should respond with this meeting', async () => {
-          Assert.equal(attendance.meetingId, meetingId)
-        })
+        describe('(when the attendance does not exist)', () => {
 
-        it('should respond with one row for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .length, 1)
-        })
+          let meetingId = null
+          let weekOf = Moment()
 
-        it('should respond with attended for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .reduce((accumulator, attendee) => attendee.attended, false), true)
-        })
+          let userId = null
+          let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
-        after(async () => {
-          await connection.deleteAttendance(meetingId, userId)
-          await connection.deleteUser(name)
-        })
+          let attendance = null
 
-      })
+          before(async () => {
 
-    })
+            meetingId = await connection.insertMeeting(weekOf)
+            userId = await connection.insertUser(name)
 
-    describe('POST', () => {
-
-      describe('(when the meeting does not exist)', () => {
-
-        let userId = null
-        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-        before(async () => {
-          userId = await connection.insertUser(name)
-        })
-
-        it('should throw an error', async () => {
-
-          try {
-
-            await Request.post('/api/attendance', {
-              'meetingId': 0,
+            let response = await Request.post('/api/attendance', {
+              'meetingId': meetingId,
               'userId': userId,
               'attended': false
             })
 
-            Assert.fail()
+            attendance = response.data
 
-          } catch (error) {
-            // OK
-          }
+          })
+
+          it('should be valid', async () => {
+            Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
+          })
+
+          it('should respond with this meeting', async () => {
+            Assert.equal(attendance.meetingId, meetingId)
+          })
+
+          it('should respond with one row for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .length, 1)
+          })
+
+          it('should respond with not attended for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .reduce((accumulator, attendee) => attendee.attended, false), false)
+          })
+
+          after(async () => {
+            await connection.deleteUser(name)
+          })
 
         })
 
-        after(async () => {
-          await connection.deleteUser(name)
-        })
+        describe('(when the attendance exists)', () => {
 
-      })
+          let meetingId = null
+          let weekOf = Moment()
 
-      describe('(when the user does not exist)', () => {
+          let userId = null
+          let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
 
-        let meetingId = null
-        let weekOf = Moment()
+          let attendance = null
 
-        before(async () => {
-          meetingId = await connection.insertMeeting(weekOf)
-        })
+          before(async () => {
 
-        it('should throw an error', async () => {
+            meetingId = await connection.insertMeeting(weekOf)
+            userId = await connection.insertUser(name)
 
-          try {
+            await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
 
-            await Request.post('/api/attendance', {
+            let response = await Request.post('/api/attendance', {
               'meetingId': meetingId,
-              'userId': 0,
-              'attended': false
+              'userId': userId,
+              'attended': true
             })
 
-            Assert.fail()
+            attendance = response.data
 
-          } catch (error) {
-            // OK
-          }
-
-        })
-
-      })
-
-      describe('(when the attendance does not exist)', () => {
-
-        let meetingId = null
-        let weekOf = Moment()
-
-        let userId = null
-        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-        let attendance = null
-
-        before(async () => {
-
-          meetingId = await connection.insertMeeting(weekOf)
-          userId = await connection.insertUser(name)
-
-          let response = await Request.post('/api/attendance', {
-            'meetingId': meetingId,
-            'userId': userId,
-            'attended': false
           })
 
-          attendance = response.data
-
-        })
-
-        it('should be valid', async () => {
-          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
-        })
-
-        it('should respond with this meeting', async () => {
-          Assert.equal(attendance.meetingId, meetingId)
-        })
-
-        it('should respond with one row for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .length, 1)
-        })
-
-        it('should respond with not attended for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .reduce((accumulator, attendee) => attendee.attended, false), false)
-        })
-
-        after(async () => {
-          await connection.deleteUser(name)
-        })
-
-      })
-
-      describe('(when the attendance exists)', () => {
-
-        let meetingId = null
-        let weekOf = Moment()
-
-        let userId = null
-        let name = `${Faker.name.lastName()}, ${Faker.name.firstName()}`
-
-        let attendance = null
-
-        before(async () => {
-
-          meetingId = await connection.insertMeeting(weekOf)
-          userId = await connection.insertUser(name)
-
-          await connection.insertAttendance(meetingId, userId, false, REMOTE_ADDRESS, USER_AGENT)
-
-          let response = await Request.post('/api/attendance', {
-            'meetingId': meetingId,
-            'userId': userId,
-            'attended': true
+          it('should be valid', async () => {
+            Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
           })
 
-          attendance = response.data
+          it('should respond with this meeting', async () => {
+            Assert.equal(attendance.meetingId, meetingId)
+          })
 
-        })
+          it('should respond with one row for this user', async () => {
+            Assert.equal(attendance.attendees
+              .filter((attendee) => attendee.userId == userId)
+              .length, 1)
+          })
 
-        it('should be valid', async () => {
-          Assert.jsonSchema(attendance, ATTENDANCE_SCHEMA)
-        })
+          it('should respond with attended for this user', async () => {
+            Assert.equal(attendance.attendees
 
-        it('should respond with this meeting', async () => {
-          Assert.equal(attendance.meetingId, meetingId)
-        })
+              .filter((attendee) => attendee.userId == userId)
+              .reduce((accumulator, attendee) => attendee.attended, false), true)
+          })
 
-        it('should respond with one row for this user', async () => {
-          Assert.equal(attendance.attendees
-            .filter((attendee) => attendee.userId == userId)
-            .length, 1)
-        })
+          after(async () => {
+            await connection.deleteAttendance(meetingId, userId)
+            await connection.deleteUser(name)
+          })
 
-        it('should respond with attended for this user', async () => {
-          Assert.equal(attendance.attendees
-
-            .filter((attendee) => attendee.userId == userId)
-            .reduce((accumulator, attendee) => attendee.attended, false), true)
-        })
-
-        after(async () => {
-          await connection.deleteAttendance(meetingId, userId)
-          await connection.deleteUser(name)
         })
 
       })
 
-    })
+      after(async () => {
 
-    after(async () => {
+        await Server.stop()
+        await connection.close()
 
-      await Server.stop()
-      await connection.close()
+      })
 
     })
 

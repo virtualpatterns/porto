@@ -38,7 +38,7 @@ task('build', [ 'clean' ], { 'async': true }, () => {
 desc('Bundle files')
 task('bundle', [ 'build' ], { 'async': true }, () => {
   Log.debug('- Bundling ...')
-  Jake.exec([ 'webpack' ], { 'printStderr': true, 'printStdout': false }, () => complete())
+  Jake.exec([ 'webpack' ], { 'printStderr': true, 'printStdout': true }, () => complete())
 })
 
 desc('Lint files')
@@ -51,15 +51,8 @@ require('./configuration')
 require('./process')
 require('./http')
 
-desc('Test the server and client')
-task('test', [ 'lint' ], { 'async': true }, () => {
-  Log.debug('- Testing ...')
-  Jake.rmRf('/var/log/porto/porto.test.log', { 'silent': true })
-  Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())
-})
-
 desc('Generate the static site')
-task('generate', [ 'test' ], { 'async': true }, () => {
+task('generate', [ 'bundle' ], { 'async': true }, () => {
 
   // await Server.start(
   //   '0.0.0.0',
@@ -80,7 +73,7 @@ task('generate', [ 'test' ], { 'async': true }, () => {
 
     Log.debug('- Generating ...')
 
-    let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --execute robots=off --mirror --no-verbose --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ])
+    let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --cut-dirs=1 --execute robots=off --mirror --no-host-directories --no-verbose --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ])
     wget.addListener('stdout', (data) => {
       Log.debug(`- ${data}`)
     })
@@ -118,8 +111,15 @@ task('generate', [ 'test' ], { 'async': true }, () => {
 
 })
 
+desc('Test the server and client')
+task('test', [ 'lint', 'generate' ], { 'async': true }, () => {
+  Log.debug('- Testing ...')
+  Jake.rmRf('/var/log/porto/porto.test.log', { 'silent': true })
+  Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www:./deployment/s3" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+})
+
 desc('Publish package')
-task('publish', [ 'configuration:default', 'generate' ], { 'async': true }, () => {
+task('publish', [ 'configuration:default', 'test' ], { 'async': true }, () => {
   Jake.exec([
     'npm publish --access public',
     'npm --no-git-tag-version version patch',

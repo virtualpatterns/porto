@@ -8,100 +8,109 @@ const Request = _Request.create({ 'baseURL': `http://${Process.env.ADDRESS}:${Pr
 
 describe('(urls)', () => {
 
-  before(async () => {
+  let staticPaths = Process.env.STATIC_PATH.split(':')
+  staticPaths.forEach((staticPath) => {
 
-    await Server.start(
-      Process.env.ADDRESS,
-      Process.env.PORT,
-      Process.env.STATIC_PATH,
-      Process.env.MODULES_PATH,
-      Process.env.DATABASE_URL)
+    describe(`(when the static path is '${staticPath}')`, () => {
 
-  })
+      before(async () => {
 
-  describe('200 OK', () => {
+        await Server.start(
+          Process.env.ADDRESS,
+          Process.env.PORT,
+          staticPath,
+          Process.env.MODULES_PATH,
+          Process.env.DATABASE_URL)
 
-    let urls = [
-      '/',
-      '/favicon.ico',
-      '/www',
-      '/www/index.html',
-      '/www/vendor/material/list/dist/mdc.list.min.css'
-    ]
+      })
 
-    describe('HEAD', () => {
+      describe('200 OK', () => {
 
-      urls.forEach((url) => {
-        it(`${url} should respond with 200 OK`, async () => {
-          Assert.equal((await Request.head(url)).status, 200)
+        let urls = [
+          '/',
+          '/favicon.ico',
+          '/www',
+          '/www/index.html',
+          '/www/vendor/material/list/dist/mdc.list.min.css'
+        ]
+
+        describe('HEAD', () => {
+
+          urls.forEach((url) => {
+            it(`${url} should respond with 200 OK`, async () => {
+              Assert.equal((await Request.head(url)).status, 200)
+            })
+          })
+
         })
+
+        describe('GET', () => {
+
+          urls.forEach((url) => {
+            it(`${url} should respond with 200 OK`, async () => {
+              Assert.equal((await Request.get(url)).status, 200)
+            })
+          })
+
+        })
+
+      })
+
+      describe('404 Not Found', () => {
+
+        let urls = [
+          '/index.html'
+        ]
+
+        describe('HEAD', () => {
+
+          urls.forEach((url) => {
+            it(`${url} should respond with 404 Not Found`, async () => {
+
+              try {
+
+                await Request.head(url)
+
+                Assert.fail()
+
+              } catch (error) {
+                // Log.inspect('error', error)
+                Assert.equal(error.response.status, 404)
+              }
+
+            })
+          })
+
+        })
+
+        describe('GET', () => {
+
+          urls.forEach((url) => {
+            it(`${url} should respond with 404 Not Found`, async () => {
+
+              try {
+
+                await Request.get(url)
+
+                Assert.fail()
+
+              } catch (error) {
+                Assert.equal(error.response.status, 404)
+              }
+
+            })
+          })
+
+        })
+
+      })
+
+      after(async () => {
+        await Server.stop()
       })
 
     })
 
-    describe('GET', () => {
-
-      urls.forEach((url) => {
-        it(`${url} should respond with 200 OK`, async () => {
-          Assert.equal((await Request.get(url)).status, 200)
-        })
-      })
-
-    })
-
-  })
-
-  describe('404 Not Found', () => {
-
-    let urls = [
-      '/index.html'
-    ]
-
-    describe('HEAD', () => {
-
-      urls.forEach((url) => {
-        it(`${url} should respond with 404 Not Found`, async () => {
-
-          try {
-
-            await Request.head(url)
-
-            Assert.fail()
-
-          } catch (error) {
-            // Log.inspect('error', error)
-            Assert.equal(error.response.status, 404)
-          }
-
-        })
-      })
-
-    })
-
-    describe('GET', () => {
-
-      urls.forEach((url) => {
-        it(`${url} should respond with 404 Not Found`, async () => {
-
-          try {
-
-            await Request.get(url)
-
-            Assert.fail()
-
-          } catch (error) {
-            Assert.equal(error.response.status, 404)
-          }
-
-        })
-      })
-
-    })
-
-  })
-
-  after(async () => {
-    await Server.stop()
   })
 
 })
