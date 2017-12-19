@@ -7,11 +7,11 @@ import { Log } from 'mablung'
 
 Jake.addListener('start', () => {
   Log.addConsole()
-  Log.debug('> Start')
+  // Log.debug('> Start')
 })
 
 Jake.addListener('complete', () => {
-  Log.debug('< Finished')
+  Log.debug('- Done')
   Log.removeConsole()
 })
 
@@ -38,7 +38,7 @@ task('build', [ 'clean' ], { 'async': true }, () => {
 desc('Bundle files')
 task('bundle', [ 'build' ], { 'async': true }, () => {
   Log.debug('- Bundling ...')
-  Jake.exec([ 'webpack' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+  Jake.exec([ 'webpack' ], { 'printStderr': true, 'printStdout': false }, () => complete())
 })
 
 desc('Lint files')

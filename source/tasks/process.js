@@ -11,17 +11,17 @@ namespace('server', () => {
 
   desc('Start server')
   task('start', [ 'bundle' ], { 'async': true }, () => {
-    Log.debug('- Starting server ...')
-    Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-server-8080.log' ], { 'printStderr': true, 'printStdout': true }, () => setTimeout(() => complete(), 5000))
+    Log.debug('- Starting ...')
+    Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-server-8080.log' ], { 'printStderr': true, 'printStdout': false }, () => setTimeout(() => complete(), 5000))
   })
 
   desc('Stop server')
   task('stop', [], { 'async': true }, () => {
-    Log.debug('- Stopping server ...')
+    Log.debug('- Stopping ...')
     Jake.exec([
       'pm2 stop porto-server-8080 --silent',
       'pm2 delete porto-server-8080 --silent'
-    ], { 'printStderr': true, 'printStdout': true }, () => complete())
+    ], { 'printStderr': true, 'printStdout': false }, () => complete())
   })
 
   desc('Show the server log')
@@ -43,17 +43,17 @@ namespace('s3', () => {
 
   desc('Start server')
   task('start', [ 'bundle' ], { 'async': true }, () => {
-    Log.debug('- Starting server (S3...')
-    Jake.exec([ 'pm2 start node --name porto-s3-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-s3-8080.log  --staticPath ./deployment/s3' ], { 'printStderr': true, 'printStdout': true }, () => setTimeout(() => complete(), 5000))
+    Log.debug('- Starting ...')
+    Jake.exec([ 'pm2 start node --name porto-s3-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-s3-8080.log  --staticPath ./deployment/s3' ], { 'printStderr': true, 'printStdout': false }, () => setTimeout(() => complete(), 5000))
   })
 
   desc('Stop server')
   task('stop', [], { 'async': true }, () => {
-    Log.debug('- Stopping server (S3) ...')
+    Log.debug('- Stopping ...')
     Jake.exec([
       'pm2 stop porto-s3-8080 --silent',
       'pm2 delete porto-s3-8080 --silent'
-    ], { 'printStderr': true, 'printStdout': true }, () => complete())
+    ], { 'printStderr': true, 'printStdout': false }, () => complete())
   })
 
   desc('Show the server log')
