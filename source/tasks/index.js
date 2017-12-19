@@ -11,7 +11,7 @@ Jake.addListener('start', () => {
 })
 
 Jake.addListener('complete', () => {
-  Log.debug('< Complete')
+  Log.debug('< Finished')
   Log.removeConsole()
 })
 
@@ -112,7 +112,7 @@ task('generate', [ 'bundle' ], { 'async': true }, () => {
 })
 
 desc('Test the server and client')
-task('test', [ 'lint', 'generate' ], { 'async': true }, () => {
+task('test', [ 'generate', 'lint' ], { 'async': true }, () => {
   Log.debug('- Testing ...')
   Jake.rmRf('/var/log/porto/porto.test.log', { 'silent': true })
   Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www:./deployment/s3" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())

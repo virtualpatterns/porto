@@ -4,7 +4,6 @@ import RESTPlugins from 'restify-plugins'
 const Static = Object.create({})
 
 const REGEXP_MATERIAL = /^\/www\/vendor\/material\/(.*)$/
-// const REGEXP_MOCHA = /^\/www\/vendor\/mocha\/(.*)$/
 const REGEXP_STATIC = /^\/www\/(.*)$/
 
 Static.createRoutes = async function(server, staticPath, modulesPath) {
@@ -32,7 +31,7 @@ Static.createRoutes = async function(server, staticPath, modulesPath) {
   catch (error) {
 
     Log.error(`    error.message='${error.message}'`)
-    Log.error(`    error.stack ...\n\n${error.stack}\n`)
+    // Log.error(`    error.stack ...\n\n${error.stack}\n`)
 
     server.get('/favicon.ico', (request, response, next) => {
       RESTPlugins.serveStatic({
@@ -85,7 +84,7 @@ Static.createRoutes = async function(server, staticPath, modulesPath) {
   catch (error) {
 
     Log.error(`    error.message='${error.message}'`)
-    Log.error(`    error.stack ...\n\n${error.stack}\n`)
+    // Log.error(`    error.stack ...\n\n${error.stack}\n`)
 
     server.get(REGEXP_MATERIAL, (request, response, next) => {
       RESTPlugins.serveStatic({
