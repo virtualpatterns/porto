@@ -20,26 +20,52 @@ const STATUS_SCHEMA = {
       'required': [ 'remote', 'forwarded' ]
     },
     'agent': { 'type': 'string' },
+    'database': {
+      'name': 'Status-Database',
+      'type': 'object',
+      'properties': {
+        'name': { 'type': 'string' },
+        'description': { 'type': 'string' },
+        'size': { 'type': 'string' },
+        'tables': {
+          'type': 'array',
+          'items': {
+            'title': 'Status-Database-Table',
+            'type': 'object',
+            'properties': {
+              'name': { 'type': 'string' },
+              'rows': { 'type': 'number' },
+              'size': { 'type': 'string' }
+            },
+            'required': [ 'name', 'rows', 'size' ]
+          },
+          'uniqueItems': true
+        },
+        'version': { 'type': 'string' }
+      },
+      'required': [ 'name', 'description', 'size', 'tables', 'version' ]
+    },
     'heap': {
       'name': 'Status-Heap',
       'type': 'object',
       'properties': {
-        'total': {
-          'type': 'number',
-          'exclusiveMinimum': 0
-        },
-        'used': {
-          'type': 'number',
-          'exclusiveMinimum': 0
-        }
+        'total': { 'type': 'string' },
+        'used': { 'type': 'string' }
       },
       'required': [ 'total', 'used' ]
     },
-    'name': { 'type': 'string' },
     'now': { 'type': 'string' },
-    'version': { 'type': 'string' },
+    'package': {
+      'name': 'Status-Package',
+      'type': 'object',
+      'properties': {
+        'name': { 'type': 'string' },
+        'version':  { 'type': 'string' }
+      },
+      'required': [ 'name', 'version' ]
+    }
   },
-  'required': [ 'address', 'agent', 'heap', 'name', 'now', 'version' ],
+  'required': [ 'address', 'agent', 'database', 'heap', 'now', 'package' ],
   'additionalProperties': false,
 }
 

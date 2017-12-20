@@ -6,6 +6,16 @@ import Promisify from 'es6-promisify'
 
 const connectionPrototype = Object.create({})
 
+connectionPrototype.getDatabase = async function() {
+  let [ rows, ] = await this.query('call getDatabase();')
+  return rows.length > 0 ? rows[0] : null
+}
+
+connectionPrototype.getTables = async function() {
+  let [ rows, ] = await this.query('call getTables();')
+  return rows
+}
+
 connectionPrototype.existsUser = async function(name) {
   let [ , rows ] = await this.query(this._connection.format('set @existsUser = existsUser(0, ?); select @existsUser as existsUser;', [ name ]))
   return rows[0].existsUser

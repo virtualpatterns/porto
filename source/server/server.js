@@ -54,7 +54,7 @@ Server.start = function (address, port, staticPath, modulesPath, databaseUrl) {
 
       Attendance.createRoutes(this.server, databaseUrl)
       Static.createRoutes(this.server, staticPath, modulesPath)
-      Status.createRoutes(this.server)
+      Status.createRoutes(this.server, databaseUrl)
 
       this.server.listen(port, address, () => {
         resolve()

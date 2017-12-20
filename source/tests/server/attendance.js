@@ -28,7 +28,8 @@ const ATTENDANCE_SCHEMA = {
             'type': 'number',
             'enum': [ 0, 1 ]
           }
-        }
+        },
+        'required': [ 'userId', 'userName', 'attended' ]
       },
       'uniqueItems': true
     },
