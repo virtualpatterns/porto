@@ -22,7 +22,7 @@ describe('insertUser ...', () => {
         await connection.insertUser(name)
       })
 
-      it('should create the user', async () => {
+      it.only('should create the user', async () => {
         Assert.ok(await connection.existsUser(name))
       })
 

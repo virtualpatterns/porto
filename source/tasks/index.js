@@ -1,13 +1,11 @@
 import 'babel-polyfill'
 import Jake from 'jake'
-// import { Log, Path } from 'mablung'
 import { Log } from 'mablung'
 
-// import Server from '../server/server'
+import Server from '../server/server'
 
 Jake.addListener('start', () => {
   Log.addConsole()
-  // Log.debug('> Start')
 })
 
 Jake.addListener('complete', () => {
@@ -53,69 +51,60 @@ require('./http')
 
 desc('Generate the static site')
 task('generate', [ 'bundle' ], { 'async': true }, () => {
+  Log.debug('- Generating ...')
 
-  // await Server.start(
-  //   '0.0.0.0',
-  //   8080,
-  //   Path.join(__dirname, '../www'),
-  //   Path.join(__dirname, '../node_modules'),
-  //   'mysql://porto:porto@localhost/porto')
-  //
-  // Jake.exec([ 'wget --directory-prefix=deployment/s3 --mirror --no-verbose http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ], { 'printStderr': true, 'printStdout': true }, async () => {
-  //   await Server.stop()
-  //   complete()
-  // })
+  Server.start(
+    '127.0.0.1',
+    8080,
+    './www',
+    './node_modules',
+    'mysql://porto:porto@127.0.0.1/porto')
+    .then(() => {
 
-  let serverStart = Jake.Task['server:start']
+      let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --cut-dirs=1 --execute robots=off --mirror --no-host-directories --no-verbose --quiet http://127.0.0.1:8080/favicon.ico http://127.0.0.1:8080/www/index.html http://127.0.0.1:8080/www/configurations/default.json http://127.0.0.1:8080/www/configurations/static.json http://127.0.0.1:8080/www/configuration.json' ], { 'printStderr': true, 'printStdout': true })
+      wget.addListener('error', (message, code) => {
+        Log.error(`- ${message} (${code})`)
+        Server.stop()
+          .then(() => complete())
+      })
+      wget.addListener('cmdEnd', () => {
+        Server.stop()
+          .then(() => complete())
+      })
 
-  serverStart.addListener('error', (error) => Log.inspect('error', error))
-  serverStart.addListener('complete', () => {
-
-    Log.debug('- Generating ...')
-
-    let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --cut-dirs=1 --execute robots=off --mirror --no-host-directories --no-verbose --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ])
-    wget.addListener('stdout', (data) => {
-      Log.debug(`- ${data}`)
-    })
-    wget.addListener('stderr', (data) => {
-      Log.error(`- ${data}`)
-    })
-    wget.addListener('error', (message, code) => {
-
-      Log.error(`- ${message} (${code})`)
-
-      let serverStop = Jake.Task['server:stop']
-
-      serverStop.addListener('error', (error) => Log.inspect('error', error))
-      serverStop.addListener('complete', () => complete())
-
-      serverStop.invoke()
+      wget.run()
 
     })
-    wget.addListener('cmdEnd', () => {
-
-      let serverStop = Jake.Task['server:stop']
-
-      serverStop.addListener('error', (error) => Log.inspect('error', error))
-      serverStop.addListener('complete', () => complete())
-
-      serverStop.invoke()
-
-    })
-
-    wget.run()
-
-  })
-
-  serverStart.invoke()
 
 })
 
 desc('Test the server and client')
-task('test', [ 'generate', 'lint' ], { 'async': true }, () => {
+task('test', [ 'lint', 'generate' ], { 'async': true }, () => {
   Log.debug('- Testing ...')
-  Jake.rmRf('/var/log/porto/porto.test.log', { 'silent': true })
-  Jake.exec([ 'env ADDRESS="0.0.0.0" DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" LOG_PATH="/var/log/porto/porto.test.log" MODULES_PATH="./node_modules" PORT="8080" STATIC_PATH="./www:./deployment/s3" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+
+  Server.start(
+    '127.0.0.1',
+    8080,
+    './www',
+    './node_modules',
+    'mysql://porto:porto@127.0.0.1/porto')
+    .then(() => {
+
+      let mocha = Jake.createExec([ 'env DATABASE_URL="mysql://porto:porto@localhost/porto" URL="http://127.0.0.1:8080" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true })
+      mocha.addListener('error', (message, code) => {
+        Log.error(`- ${message} (${code})`)
+        Server.stop()
+          .then(() => complete())
+      })
+      mocha.addListener('cmdEnd', () => {
+        Server.stop()
+          .then(() => complete())
+      })
+
+      mocha.run()
+
+    })
+
 })
 
 desc('Publish package')

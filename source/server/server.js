@@ -8,6 +8,8 @@ import Package from '../package.json'
 import Static from './routes/static'
 import Status from './routes/status'
 
+const STOP_TIMEOUT = 5000
+
 const Server = Object.create({})
 
 Server.start = function (address, port, staticPath, modulesPath, databaseUrl) {
@@ -78,7 +80,7 @@ Server.stop = function () {
 
       this.server.close(() => {
         // Log.debug('- this.server.close()')
-        resolve()
+        setTimeout(() => resolve(), STOP_TIMEOUT)
       })
 
     }
