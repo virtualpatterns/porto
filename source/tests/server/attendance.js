@@ -4,9 +4,9 @@ import { Process } from 'mablung'
 import Moment from 'moment'
 import _Request from 'axios'
 
-import Database from '../../server/library/database'
+import Database from '../../server/database'
 
-const Request = _Request.create({ 'baseURL': `http://${Process.env.ADDRESS}:${Process.env.PORT}` })
+const Request = _Request.create({ 'baseURL': Process.env.SERVER_URL })
 
 const ATTENDANCE_SCHEMA = {
   'title': 'Attendance',
@@ -60,7 +60,7 @@ describe('attendance', () => {
       })
 
       it('should respond with the \'Access-Control-Allow-Methods\' header', async () => {
-        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, POST, OPTIONS')
+        Assert.equal((await Request.options('/api/attendance')).headers['access-control-allow-methods'], 'GET, HEAD, OPTIONS, POST')
       })
 
       it('should respond with the \'Access-Control-Allow-Headers\' header', async () => {

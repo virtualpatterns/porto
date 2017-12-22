@@ -25,8 +25,8 @@ Server.start = function (address, port, staticPath, modulesPath, databaseUrl) {
 
       this.server.on('restifyError', (request, response, error, callback) => {
         Log.error('- server.on(\'restifyError\', function(request, response, error, callback) { ... })')
-        Log.error(`    error.message='${error.message}'`)
-        Log.error(`    error.stack ...\n\n${error.stack}\n`)
+        Log.error(`-   error.message='${error.message}'`)
+        Log.error(`-   error.stack ...\n\n${error.stack}\n`)
         // response.send(error)
         return callback()
       })
@@ -46,9 +46,9 @@ Server.start = function (address, port, staticPath, modulesPath, databaseUrl) {
         if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
         if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
 
-        response.header('Access-Control-Allow-Origin', '*')
-        response.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        response.header('Access-Control-Allow-Headers', 'Content-Type')
+        // response.header('Access-Control-Allow-Origin', '*')
+        // response.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        // response.header('Access-Control-Allow-Headers', 'Content-Type')
 
         return next()
 

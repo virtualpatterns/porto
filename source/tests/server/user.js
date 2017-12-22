@@ -2,7 +2,7 @@ import { assert as Assert } from 'chai'
 import Faker from 'faker'
 import { Process } from 'mablung'
 
-import Database from '../../server/library/database'
+import Database from '../../server/database'
 
 describe('insertUser ...', () => {
 
@@ -22,7 +22,7 @@ describe('insertUser ...', () => {
         await connection.insertUser(name)
       })
 
-      it.only('should create the user', async () => {
+      it('should create the user', async () => {
         Assert.ok(await connection.existsUser(name))
       })
 

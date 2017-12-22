@@ -46,7 +46,6 @@ connectionPrototype.nextMeetingOn = async function(weekOf) {
   Log.debug(`- this.nextMeetingOn('${weekOf.toDate()}') { ... }`)
 
   let [ , rows ] = await this.query(this._connection.format('set @nextMeetingOn = nextMeetingOn(?); select @nextMeetingOn as nextMeetingOn;', [ weekOf.toDate() ]))
-  // let nextMeetingOn = new Date(rows[0].nextMeetingOn)
   let nextMeetingOn = Moment(rows[0].nextMeetingOn)
 
   Log.debug(`-   rows[0].nextMeetingOn='${rows[0].nextMeetingOn}'`)

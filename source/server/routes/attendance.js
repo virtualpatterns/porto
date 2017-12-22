@@ -2,15 +2,19 @@ import { Log } from 'mablung'
 import Moment from 'moment'
 import RESTErrors from 'restify-errors'
 
-import Database from '../library/database'
+import Database from '../database'
 
 const Attendance = Object.create({})
 
 Attendance.createRoutes = function(server, databaseUrl) {
 
   server.opts('/api/attendance', (request, response, next) => {
+
+    Attendance.addHeaders(response)
+
     response.send(200, {})
     return next()
+
   })
 
   server.head('/api/attendance', (request, response, next) => {
@@ -19,6 +23,8 @@ Attendance.createRoutes = function(server, databaseUrl) {
   })
 
   server.get('/api/attendance', async (request, response, next) => {
+
+    Attendance.addHeaders(response)
 
     try {
 
@@ -38,8 +44,8 @@ Attendance.createRoutes = function(server, databaseUrl) {
     catch (error) {
 
       Log.error('- server.get(\'/api/attendance\', (request, response, next) => { ... })')
-      Log.error(`    error.message='${error.message}'`)
-      Log.error(`    error.stack ...\n\n${error.stack}\n`)
+      Log.error(`-   error.message='${error.message}'`)
+      Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
       return next(new RESTErrors.InternalServerError())
 
@@ -48,6 +54,8 @@ Attendance.createRoutes = function(server, databaseUrl) {
   })
 
   server.post('/api/attendance', async (request, response, next) => {
+
+    Attendance.addHeaders(response)
 
     try {
 
@@ -67,8 +75,8 @@ Attendance.createRoutes = function(server, databaseUrl) {
     catch (error) {
 
       Log.error('- server.post(\'/api/attendance\', (request, response, next) => { ... })')
-      Log.error(`    error.message='${error.message}'`)
-      Log.error(`    error.stack ...\n\n${error.stack}\n`)
+      Log.error(`-   error.message='${error.message}'`)
+      Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
       return next(new RESTErrors.InternalServerError())
 
@@ -76,6 +84,14 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
   })
 
+}
+
+Attendance.addHeaders = function(response) {
+
+  response.header('Access-Control-Allow-Origin', '*')
+  response.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST')
+  response.header('Access-Control-Allow-Headers', 'Content-Type')
+  
 }
 
 Attendance.toJSON = function(rows) {

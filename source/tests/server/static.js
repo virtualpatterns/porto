@@ -2,7 +2,7 @@ import { assert as Assert } from 'chai'
 import { Process } from 'mablung'
 import _Request from 'axios'
 
-const Request = _Request.create({ 'baseURL': `http://${Process.env.ADDRESS}:${Process.env.PORT}` })
+const Request = _Request.create({ 'baseURL': Process.env.SERVER_URL })
 
 describe('(urls)', () => {
 
@@ -18,21 +18,25 @@ describe('(urls)', () => {
 
     describe('HEAD', () => {
 
-      urls.forEach((url) => {
+      for (let url of urls) {
+
         it(`${url} should respond with 200 OK`, async () => {
           Assert.equal((await Request.head(url)).status, 200)
         })
-      })
+
+      }
 
     })
 
     describe('GET', () => {
 
-      urls.forEach((url) => {
+      for (let url of urls) {
+
         it(`${url} should respond with 200 OK`, async () => {
           Assert.equal((await Request.get(url)).status, 200)
         })
-      })
+
+      }
 
     })
 
@@ -46,7 +50,8 @@ describe('(urls)', () => {
 
     describe('HEAD', () => {
 
-      urls.forEach((url) => {
+      for (let url of urls) {
+
         it(`${url} should respond with 404 Not Found`, async () => {
 
           try {
@@ -61,13 +66,15 @@ describe('(urls)', () => {
           }
 
         })
-      })
+
+      }
 
     })
 
     describe('GET', () => {
 
-      urls.forEach((url) => {
+      for (let url of urls) {
+
         it(`${url} should respond with 404 Not Found`, async () => {
 
           try {
@@ -81,7 +88,8 @@ describe('(urls)', () => {
           }
 
         })
-      })
+
+      }
 
     })
 

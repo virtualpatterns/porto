@@ -23,10 +23,10 @@
     "url": "https://github.com/virtualpatterns/porto"
   },
   "scripts": {
-    "clean-jake": "rm -r -f ./tasks",
-    "build-jake": "npm run-script clean-jake && babel ./source/tasks --copy-files --out-dir ./tasks --quiet --source-maps inline",
-    "jake": "npm run-script build-jake && jake --jakefile ./tasks/index.js --trace",
-    "tasks": "npm run-script build-jake && jake --jakefile ./tasks/index.js --tasks",
+    "clean": "rm -r -f ./tasks",
+    "build": "npm run-script clean && babel ./source/tasks --copy-files --out-dir ./tasks --quiet --source-maps inline",
+    "jake": "npm run-script build && jake --jakefile ./tasks/index.js --trace",
+    "tasks": "npm run-script build && jake --jakefile ./tasks/index.js --tasks",
     "upgrade": "npm-check-updates --upgrade",
     "run-debug": "rm -f /var/log/porto/porto.log && npm run-script bundle && node --inspect server/index.js run --databaseUrl mysql://porto:porto@localhost/porto?debug=true --logPath /var/log/porto/porto.log",
     "test-debug": "rm -f /var/log/porto/porto.test.log && npm run-script bundle && npm run-script lint && env ADDRESS=\"0.0.0.0\" DATABASE_URL=\"mysql://porto:porto@localhost/porto?multipleStatements=true\" LOG_PATH=\"/var/log/porto/porto.test.log\" MODULES_PATH=\"./node_modules\" PORT=\"8080\" STATIC_PATH=\"./www\" mocha --bail --inspect-brk --recursive --timeout 0 ./tests",

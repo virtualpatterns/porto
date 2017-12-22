@@ -3,10 +3,12 @@ import Command from 'commander'
 import { Log, Path, Process } from 'mablung'
 
 import Package from '../package.json'
-import Server from './server'
+import DynamicServer from './dynamic-server'
+import StaticServer from './static-server'
 
 const ADDRESS = '0.0.0.0'
 const DATABASE_URL = 'mysql://localhost/porto'
+const IS_STATIC = false
 // const LOG_PATH = Path.join(Process.cwd(), 'porto.log')
 const MODULES_PATH = Path.join(__dirname, '../node_modules')
 const PORT = 8080
@@ -20,6 +22,7 @@ Command
   .description('Run the server')
   .option('--address <address>', `Listening IPv4 or IPv6 address, defaults to ${ADDRESS}`)
   .option('--databaseUrl <url>', `Database URL, defaults to ${DATABASE_URL}`)
+  .option('--isStatic', `Static servers are used for testing, defaults to ${IS_STATIC}`)
   .option('--logPath <path>', 'Log file path, defaults to console') // ${Path.trim(LOG_PATH)}
   .option('--modulesPath <path>', `Modules path, defaults to ${Path.trim(MODULES_PATH)}`)
   .option('--port <number>', `Listening port, defaults to ${PORT}`)
@@ -33,6 +36,8 @@ Command
     }
 
     try {
+
+      const Server = options.isStatic ? StaticServer : DynamicServer
 
       Process.on('SIGHUP', () => {
 
@@ -66,8 +71,8 @@ Command
       Process.once('uncaughtException', async (error) => {
 
         Log.error('- Process.once(\'uncaughtException\', async (error) => { ... })')
-        Log.error(`    error.message='${error.message}'`)
-        Log.error(`    error.stack=\n\n${error.stack}\n`)
+        Log.error(`-   error.message='${error.message}'`)
+        Log.error(`-   error.stack=\n\n${error.stack}\n`)
 
         await Server.stop()
         Process.exit(1)
@@ -85,8 +90,8 @@ Command
     catch (error) {
 
       Log.error('- catch (error) { ... }')
-      Log.error(`    error.message='${error.message}'`)
-      Log.error(`    error.stack ...\n\n${error.stack}\n`)
+      Log.error(`-   error.message='${error.message}'`)
+      Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
       Process.exit(1)
 

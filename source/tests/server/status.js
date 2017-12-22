@@ -2,7 +2,7 @@ import { assert as Assert } from 'chai'
 import { Process } from 'mablung'
 import _Request from 'axios'
 
-const Request = _Request.create({ 'baseURL': `http://${Process.env.ADDRESS}:${Process.env.PORT}` })
+const Request = _Request.create({ 'baseURL': Process.env.SERVER_URL })
 
 const STATUS_SCHEMA = {
   'title': 'Status',

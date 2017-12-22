@@ -3,7 +3,7 @@ import { Log, Process } from 'mablung'
 
 import RESTErrors from 'restify-errors'
 
-import Database from '../library/database'
+import Database from '../database'
 import Package from '../../package.json'
 
 const Status = Object.create({})
@@ -74,8 +74,8 @@ Status.createRoutes = function (server, databaseUrl) {
     catch (error) {
 
       Log.error('- server.get(\'/api/status\', (request, response, next) => { ... })')
-      Log.error(`    error.message='${error.message}'`)
-      Log.error(`    error.stack ...\n\n${error.stack}\n`)
+      Log.error(`-   error.message='${error.message}'`)
+      Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
       return next(new RESTErrors.InternalServerError())
 

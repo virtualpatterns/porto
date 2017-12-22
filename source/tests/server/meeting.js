@@ -3,7 +3,7 @@ import Faker from 'faker'
 import { Process } from 'mablung'
 import Moment from 'moment'
 
-import Database from '../../server/library/database'
+import Database from '../../server/database'
 
 describe('insertMeeting ...', () => {
 

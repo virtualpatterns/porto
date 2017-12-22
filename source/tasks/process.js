@@ -11,24 +11,14 @@ namespace('server', () => {
 
   desc('Start server')
   task('start', [ 'bundle' ], { 'async': true }, () => {
-    Log.debug('- Starting ...')
-    Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-server-8080.log' ], { 'printStderr': true, 'printStdout': false }, () => setTimeout(() => complete(), 5000))
+    Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-server-8080.log' ], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
   desc('Stop server')
   task('stop', [], { 'async': true }, () => {
-    Log.debug('- Stopping ...')
     Jake.exec([
       'pm2 stop porto-server-8080 --silent',
       'pm2 delete porto-server-8080 --silent'
-    ], { 'printStderr': true, 'printStdout': false }, () => complete())
-  })
-
-  desc('Show the server log')
-  task('log', [], { 'async': true }, () => {
-    Jake.exec([
-      'clear',
-      'tail -f /var/log/porto/porto-server-8080.log'
     ], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
@@ -36,32 +26,44 @@ namespace('server', () => {
 
 namespace('s3', () => {
 
-  desc('Run server')
+  desc('Run S3 server')
   task('run', [ 'generate' ], { 'async': true }, () => {
-    Jake.exec([ 'node ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --staticPath ./deployment/s3' ], { 'printStderr': true, 'printStdout': true }, () => complete())
-  })
 
-  desc('Start server')
-  task('start', [ 'bundle' ], { 'async': true }, () => {
-    Log.debug('- Starting ...')
-    Jake.exec([ 'pm2 start node --name porto-s3-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-s3-8080.log  --staticPath ./deployment/s3' ], { 'printStderr': true, 'printStdout': false }, () => setTimeout(() => complete(), 5000))
-  })
+    const DynamicServer = require('../server/dynamic-server')
 
-  desc('Stop server')
-  task('stop', [], { 'async': true }, () => {
-    Log.debug('- Stopping ...')
-    Jake.exec([
-      'pm2 stop porto-s3-8080 --silent',
-      'pm2 delete porto-s3-8080 --silent'
-    ], { 'printStderr': true, 'printStdout': false }, () => complete())
-  })
+    DynamicServer.start(
+      '0.0.0.0',
+      8080,
+      './www',
+      './node_modules',
+      'mysql://porto:porto@127.0.0.1/porto')
+      .then(() => {
 
-  desc('Show the server log')
-  task('log', [], { 'async': true }, () => {
-    Jake.exec([
-      'clear',
-      'tail -f /var/log/porto/porto-s3-8080.log'
-    ], { 'printStderr': true, 'printStdout': true }, () => complete())
+        Jake.cpR('./deployment/s3/configurations/localhost.json', './deployment/s3/configuration.json', { 'silent': true })
+
+        let staticServer = Jake.createExec([ 'node ./server/index.js run --isStatic --port 8081 --staticPath ./deployment/s3' ], { 'printStderr': true, 'printStdout': true })
+        staticServer.addListener('error', (message, code) => {
+          Log.error(`- ${message} (${code})`)
+          DynamicServer.stop()
+            .then(() => Jake.cpR('./deployment/s3/configurations/default.json', './deployment/s3/configuration.json', { 'silent': true }))
+            .then(() => complete())
+        })
+        staticServer.addListener('cmdEnd', () => {
+          DynamicServer.stop()
+            .then(() => Jake.cpR('./deployment/s3/configurations/default.json', './deployment/s3/configuration.json', { 'silent': true }))
+            .then(() => complete())
+        })
+
+        staticServer.run()
+
+      })
+      .catch((error) => {
+        Log.error('- DynamicServer.start(\'0.0.0.0\', 8080, \'./www\', \'./node_modules\', \'mysql://porto:porto@127.0.0.1/porto\')')
+        Log.error(`-   error.message='${error.message}'`)
+        Log.error(`-   error.stack ...\n\n${error.stack}\n`)
+        complete()
+      })
+
   })
 
 })
@@ -83,14 +85,6 @@ namespace('proxy', () => {
   task('stop', [], { 'async': true }, () => {
     Log.debug('- Stopping ...')
     Jake.exec([ 'sudo kill $(cat /var/run/haproxy.pid)' ], { 'printStderr': true, 'printStdout': true }, () => complete())
-  })
-
-  desc('Show the HAProxy log')
-  task('log', [], { 'async': true }, () => {
-    Jake.exec([
-      'clear',
-      'tail -f /var/log/haproxy/haproxy.log'
-    ], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
 })
