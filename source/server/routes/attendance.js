@@ -6,25 +6,19 @@ import Database from '../database'
 
 const Attendance = Object.create({})
 
-Attendance.createRoutes = function(server, databaseUrl) {
+Attendance.createRoutes = function(_server, databaseUrl) {
 
-  server.opts('/api/attendance', (request, response, next) => {
-
-    Attendance.addHeaders(response)
-
-    response.send(200, {})
-    return next()
-
-  })
-
-  server.head('/api/attendance', (request, response, next) => {
+  _server.opts('/api/attendance', (request, response, next) => {
     response.send(200, {})
     return next()
   })
 
-  server.get('/api/attendance', async (request, response, next) => {
+  _server.head('/api/attendance', (request, response, next) => {
+    response.send(200, {})
+    return next()
+  })
 
-    Attendance.addHeaders(response)
+  _server.get('/api/attendance', async (request, response, next) => {
 
     try {
 
@@ -43,7 +37,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
     }
     catch (error) {
 
-      Log.error('- server.get(\'/api/attendance\', (request, response, next) => { ... })')
+      Log.error('- _server.get(\'/api/attendance\', (request, response, next) => { ... })')
       Log.error(`-   error.message='${error.message}'`)
       Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
@@ -53,9 +47,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
   })
 
-  server.post('/api/attendance', async (request, response, next) => {
-
-    Attendance.addHeaders(response)
+  _server.post('/api/attendance', async (request, response, next) => {
 
     try {
 
@@ -74,7 +66,7 @@ Attendance.createRoutes = function(server, databaseUrl) {
     }
     catch (error) {
 
-      Log.error('- server.post(\'/api/attendance\', (request, response, next) => { ... })')
+      Log.error('- _server.post(\'/api/attendance\', (request, response, next) => { ... })')
       Log.error(`-   error.message='${error.message}'`)
       Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
@@ -84,14 +76,6 @@ Attendance.createRoutes = function(server, databaseUrl) {
 
   })
 
-}
-
-Attendance.addHeaders = function(response) {
-
-  response.header('Access-Control-Allow-Origin', '*')
-  response.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST')
-  response.header('Access-Control-Allow-Headers', 'Content-Type')
-  
 }
 
 Attendance.toJSON = function(rows) {

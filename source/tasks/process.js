@@ -6,12 +6,12 @@ namespace('server', () => {
 
   desc('Run server')
   task('run', [ 'bundle' ], { 'async': true }, () => {
-    Jake.exec([ 'node ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+    Jake.exec([ 'node ./server/index.js run'], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
   desc('Start server')
   task('start', [ 'bundle' ], { 'async': true }, () => {
-    Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --databaseUrl mysql://porto:porto@localhost/porto --logPath /var/log/porto/porto-server-8080.log' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+    Jake.exec([ 'pm2 start node --name porto-server-8080 --silent -- ./server/index.js run --logPath /var/log/porto/porto-server-8080.log' ], { 'printStderr': true, 'printStdout': true }, () => complete())
   })
 
   desc('Stop server')
@@ -29,36 +29,33 @@ namespace('s3', () => {
   desc('Run S3 server')
   task('run', [ 'generate' ], { 'async': true }, () => {
 
-    const DynamicServer = require('../server/dynamic-server')
+    const Server = require('../server/server')
 
-    DynamicServer.start(
-      '0.0.0.0',
-      8080,
-      './www',
-      './node_modules',
-      'mysql://porto:porto@127.0.0.1/porto')
+    let server = Server.createServer()
+
+    server.start()
       .then(() => {
 
         Jake.cpR('./deployment/s3/configurations/localhost.json', './deployment/s3/configuration.json', { 'silent': true })
 
-        let staticServer = Jake.createExec([ 'node ./server/index.js run --isStatic --port 8081 --staticPath ./deployment/s3' ], { 'printStderr': true, 'printStdout': true })
-        staticServer.addListener('error', (message, code) => {
+        let s3 = Jake.createExec([ 'node ./server/index.js run --port 8081 --staticPath ./deployment/s3 --s3' ], { 'printStderr': true, 'printStdout': true })
+        s3.addListener('error', (message, code) => {
           Log.error(`- ${message} (${code})`)
-          DynamicServer.stop()
+          server.stop()
             .then(() => Jake.cpR('./deployment/s3/configurations/default.json', './deployment/s3/configuration.json', { 'silent': true }))
             .then(() => complete())
         })
-        staticServer.addListener('cmdEnd', () => {
-          DynamicServer.stop()
+        s3.addListener('cmdEnd', () => {
+          server.stop()
             .then(() => Jake.cpR('./deployment/s3/configurations/default.json', './deployment/s3/configuration.json', { 'silent': true }))
             .then(() => complete())
         })
 
-        staticServer.run()
+        s3.run()
 
       })
       .catch((error) => {
-        Log.error('- DynamicServer.start(\'0.0.0.0\', 8080, \'./www\', \'./node_modules\', \'mysql://porto:porto@127.0.0.1/porto\')')
+        Log.error('- Server.start()')
         Log.error(`-   error.message='${error.message}'`)
         Log.error(`-   error.stack ...\n\n${error.stack}\n`)
         complete()
@@ -68,7 +65,7 @@ namespace('s3', () => {
 
 })
 
-namespace('proxy', () => {
+namespace('haproxy', () => {
 
   desc('Run HAProxy')
   task('run', [], { 'async': true }, () => {

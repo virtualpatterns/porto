@@ -43,7 +43,7 @@ connectionPrototype.restoreAllUsers = async function() {
 }
 
 connectionPrototype.nextMeetingOn = async function(weekOf) {
-  Log.debug(`- this.nextMeetingOn('${weekOf.toDate()}') { ... }`)
+  Log.debug(`- Connection.nextMeetingOn('${weekOf.toDate()}') { ... }`)
 
   let [ , rows ] = await this.query(this._connection.format('set @nextMeetingOn = nextMeetingOn(?); select @nextMeetingOn as nextMeetingOn;', [ weekOf.toDate() ]))
   let nextMeetingOn = Moment(rows[0].nextMeetingOn)

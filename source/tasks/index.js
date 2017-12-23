@@ -1,4 +1,3 @@
-import 'babel-polyfill'
 import Jake from 'jake'
 import { Log } from 'mablung'
 
@@ -55,24 +54,21 @@ desc('Generate the static site')
 task('generate', [ 'bundle' ], { 'async': true }, () => {
   Log.debug('- Generating ...')
 
-  const DynamicServer = require('../server/dynamic-server')
+  const Server = require('../server/server')
 
-  DynamicServer.start(
-    '0.0.0.0',
-    8080,
-    './www',
-    './node_modules',
-    'mysql://porto:porto@127.0.0.1/porto')
+  let server = Server.createServer()
+
+  server.start()
     .then(() => {
 
       let wget = Jake.createExec([ 'wget --directory-prefix=deployment/s3 --cut-dirs=1 --execute robots=off --mirror --no-host-directories --no-verbose --quiet http://localhost:8080/favicon.ico http://localhost:8080/www/index.html http://localhost:8080/www/configurations/default.json http://localhost:8080/www/configurations/localhost.json http://localhost:8080/www/configurations/static.json http://localhost:8080/www/configuration.json' ], { 'printStderr': true, 'printStdout': true })
       wget.addListener('error', (message, code) => {
         Log.error(`- ${message} (${code})`)
-        DynamicServer.stop()
+        server.stop()
           .then(() => complete())
       })
       wget.addListener('cmdEnd', () => {
-        DynamicServer.stop()
+        server.stop()
           .then(() => complete())
       })
 
@@ -80,6 +76,7 @@ task('generate', [ 'bundle' ], { 'async': true }, () => {
 
     })
     .catch((error) => {
+      Log.error('- Server.start()')
       Log.error(`-   error.message='${error.message}'`)
       Log.error(`-   error.stack ...\n\n${error.stack}\n`)
       complete()
@@ -91,41 +88,35 @@ desc('Test the server and client')
 task('test', [ 'lint', 'generate' ], { 'async': true }, () => {
   Log.debug('- Testing ...')
 
-  const DynamicServer = require('../server/dynamic-server')
-  const StaticServer = require('../server/static-server')
+  const Server = require('../server/server')
 
-  DynamicServer.start(
-    '0.0.0.0',
-    8080,
-    './www',
-    './node_modules',
-    'mysql://porto:porto@localhost/porto')
+  let server = Server.createServer()
+
+  server.start()
     .then(() => {
 
       Jake.cpR('./deployment/s3/configurations/localhost.json', './deployment/s3/configuration.json', { 'silent': true })
 
-      StaticServer.start(
-        '0.0.0.0',
-        8081,
-        './deployment/s3')
+      let s3 = Server.createServer({ 'port': 8081, 'staticPath': './deployment/s3'})
+
+      s3.start()
         .then(() => {
 
           Jake.rmRf('/var/log/porto/porto-tests.log', { 'silent': true })
 
-          let mocha = Jake.createExec([ 'env DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" SERVER_URL="http://localhost:8080/" STATIC_URL="http://localhost:8081/" mocha --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true })
-          // let mocha = Jake.createExec([ 'env DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" SERVER_URL="http://localhost:8080/" STATIC_URL="http://localhost:8081/" istanbul cover ./node_modules/.bin/_mocha --dir ./coverage -- --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true })
+          let mocha = Jake.createExec([ 'env DATABASE_URL="mysql://porto:porto@localhost/porto?multipleStatements=true" SERVER_URL="http://localhost:8080/" S3_URL="http://localhost:8081/" mocha --bail --recursive --timeout 0 ./tests' ], { 'printStderr': true, 'printStdout': true })
           mocha.addListener('error', (message, code) => {
             Log.error(`- ${message} (${code})`)
 
-            StaticServer.stop()
-              .then(() => DynamicServer.stop())
+            s3.stop()
+              .then(() => server.stop())
               .then(() => Jake.cpR('./deployment/s3/configurations/default.json', './deployment/s3/configuration.json', { 'silent': true }))
               .then(() => complete())
 
           })
           mocha.addListener('cmdEnd', () => {
-            StaticServer.stop()
-              .then(() => DynamicServer.stop())
+            s3.stop()
+              .then(() => server.stop())
               .then(() => Jake.cpR('./deployment/s3/configurations/default.json', './deployment/s3/configuration.json', { 'silent': true }))
               .then(() => complete())
           })
@@ -134,16 +125,18 @@ task('test', [ 'lint', 'generate' ], { 'async': true }, () => {
 
         })
         .catch((error) => {
+          Log.error('- Server.start()')
           Log.error(`-   error.message='${error.message}'`)
           Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
-          DynamicServer.stop()
+          server.stop()
             .then(() => complete())
 
         })
 
     })
     .catch((error) => {
+      Log.error('- Server.start()')
       Log.error(`-   error.message='${error.message}'`)
       Log.error(`-   error.stack ...\n\n${error.stack}\n`)
       complete()

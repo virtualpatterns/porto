@@ -8,14 +8,14 @@ import Package from '../../package.json'
 
 const Status = Object.create({})
 
-Status.createRoutes = function (server, databaseUrl) {
+Status.createRoutes = function (_server, databaseUrl) {
 
-  server.head('/api/status', (request, response, next) => {
+  _server.head('/api/status', (request, response, next) => {
     response.send(200, {})
     return next()
   })
 
-  server.get('/api/status', async (request, response, next) => {
+  _server.get('/api/status', async (request, response, next) => {
 
     try {
 
@@ -73,7 +73,7 @@ Status.createRoutes = function (server, databaseUrl) {
     }
     catch (error) {
 
-      Log.error('- server.get(\'/api/status\', (request, response, next) => { ... })')
+      Log.error('- _server.get(\'/api/status\', (request, response, next) => { ... })')
       Log.error(`-   error.message='${error.message}'`)
       Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 

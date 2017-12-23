@@ -4,14 +4,6 @@ import Patch from 'virtual-dom/patch'
 
 const elementPrototype = Object.create({})
 
-// elementPrototype.setState = function(data = {}) {
-//   Object.assign(this.state, data)
-// }
-//
-// elementPrototype.getState = function(name) {
-//   return name ? this.state[name] : Object.assign({}, this.state)
-// }
-
 elementPrototype.getContent = function() {}
 
 elementPrototype.render = function() {
@@ -51,7 +43,7 @@ Element.nextId = 0
 
 Element.createElement = function(parentSelector, prototype = elementPrototype) {
 
-  var element = Object.create(prototype)
+  let element = Object.create(prototype)
 
   element.id = `id_${Element.nextId ++}`
   element.parentSelector = parentSelector

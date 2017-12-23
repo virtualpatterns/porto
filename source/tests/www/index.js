@@ -9,9 +9,9 @@ import Database from '../../server/database'
 describe('/www/index.html', () => {
 
   let connection = null
-  let baseUrls = [ Process.env.SERVER_URL, Process.env.STATIC_URL ]
+  let baseUrls = [ Process.env.SERVER_URL, Process.env.S3_URL ]
   // let baseUrls = [ Process.env.SERVER_URL ]
-  // let baseUrls = [ Process.env.STATIC_URL ]
+  // let baseUrls = [ Process.env.S3_URL ]
 
   before(async () => {
     connection = await Database.open(Process.env.DATABASE_URL)

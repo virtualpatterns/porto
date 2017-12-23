@@ -3,16 +3,7 @@ import Command from 'commander'
 import { Log, Path, Process } from 'mablung'
 
 import Package from '../package.json'
-import DynamicServer from './dynamic-server'
-import StaticServer from './static-server'
-
-const ADDRESS = '0.0.0.0'
-const DATABASE_URL = 'mysql://localhost/porto'
-const IS_STATIC = false
-// const LOG_PATH = Path.join(Process.cwd(), 'porto.log')
-const MODULES_PATH = Path.join(__dirname, '../node_modules')
-const PORT = 8080
-const STATIC_PATH = Path.join(__dirname, '../www')
+import Server from './server'
 
 Command
   .version(Package.version)
@@ -20,13 +11,13 @@ Command
 Command
   .command('run')
   .description('Run the server')
-  .option('--address <address>', `Listening IPv4 or IPv6 address, defaults to ${ADDRESS}`)
-  .option('--databaseUrl <url>', `Database URL, defaults to ${DATABASE_URL}`)
-  .option('--isStatic', `Static servers are used for testing, defaults to ${IS_STATIC}`)
-  .option('--logPath <path>', 'Log file path, defaults to console') // ${Path.trim(LOG_PATH)}
-  .option('--modulesPath <path>', `Modules path, defaults to ${Path.trim(MODULES_PATH)}`)
-  .option('--port <number>', `Listening port, defaults to ${PORT}`)
-  .option('--staticPath <path>', `Static file path, defaults to ${Path.trim(STATIC_PATH)}`)
+  .option('--address <address>', `Listening IPv4 or IPv6 address, defaults to ${Server.DEFAULT_ADDRESS}`)
+  .option('--databaseUrl <url>', `Database URL, defaults to ${Server.DEFAULT_DATABASE_URL}`)
+  .option('--logPath <path>', 'Log file path, defaults to console')
+  .option('--modulesPath <path>', `Modules path, defaults to ${Path.trim(Server.DEFAULT_MODULES_PATH)}`)
+  .option('--port <number>', `Listening port, defaults to ${Server.DEFAULT_PORT}`)
+  .option('--staticPath <path>', `Static file path, defaults to ${Path.trim(Server.DEFAULT_STATIC_PATH)}`)
+  .option('--s3', `S3 servers are used for testing, defaults to ${false}`)
   .action(async (options) => {
 
     if (options.logPath) {
@@ -37,7 +28,14 @@ Command
 
     try {
 
-      const Server = options.isStatic ? StaticServer : DynamicServer
+      let server = Server.createServer({
+        'address' : options.address || Server.DEFAULT_ADDRESS,
+        'databaseUrl' : options.databaseUrl || Server.DEFAULT_DATABASE_URL,
+        'modulesPath' : options.modulesPath || Server.DEFAULT_MODULES_PATH,
+        'port' : options.port || Server.DEFAULT_PORT,
+        'staticPath' : options.staticPath || Server.DEFAULT_STATIC_PATH,
+        'isS3': !!options.s3
+      })
 
       Process.on('SIGHUP', () => {
 
@@ -54,8 +52,8 @@ Command
 
         Log.debug('- Process.once(\'SIGINT\', async () => { ... })')
 
-        await Server.stop()
-        Process.exit()
+        await server.stop()
+        Process.exit(1)
 
       })
 
@@ -63,8 +61,8 @@ Command
 
         Log.debug('- Process.once(\'SIGTERM\', async () => { ... })')
 
-        await Server.stop()
-        Process.exit()
+        await server.stop()
+        Process.exit(1)
 
       })
 
@@ -74,17 +72,12 @@ Command
         Log.error(`-   error.message='${error.message}'`)
         Log.error(`-   error.stack=\n\n${error.stack}\n`)
 
-        await Server.stop()
-        Process.exit(1)
+        await server.stop()
+        Process.exit(2)
 
       })
 
-      await Server.start(
-        options.address || ADDRESS,
-        options.port || PORT,
-        options.staticPath || STATIC_PATH,
-        options.modulesPath || MODULES_PATH,
-        options.databaseUrl || DATABASE_URL)
+      await server.start()
 
     }
     catch (error) {
@@ -93,7 +86,7 @@ Command
       Log.error(`-   error.message='${error.message}'`)
       Log.error(`-   error.stack ...\n\n${error.stack}\n`)
 
-      Process.exit(1)
+      Process.exit(2)
 
     }
 
