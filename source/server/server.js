@@ -1,3 +1,4 @@
+import _CORS from 'restify-cors-middleware'
 import Is from '@pwn/is'
 import { Log, Path } from 'mablung'
 import RESTPlugins from 'restify-plugins'
@@ -9,7 +10,14 @@ import S3 from './routes/s3'
 import Static from './routes/static'
 import Status from './routes/status'
 
-const REGEXP_API = /^\/api\/(.*)$/
+const CORS = _CORS({
+  'preflightMaxAge': 5,
+  'origins': [ '*'],
+  'allowHeaders': ['X-Forwarded-For'],
+  'exposeHeaders': ['']
+})
+
+// const REGEXP_API = /^\/api\/(.*)$/
 const STOP_TIMEOUT = 5000
 
 const serverPrototype = Object.create({})
@@ -77,19 +85,21 @@ Server.createServer = function({ address = Server.DEFAULT_ADDRESS, databaseUrl =
   })
 
   _server.pre(RESTPlugins.pre.userAgentConnection())
+  _server.pre(CORS.preflight)
 
   _server.use(RESTPlugins.queryParser({}))
   _server.use(RESTPlugins.bodyParser({}))
+  _server.use(CORS.actual)
   _server.use((request, response, next) => {
     Log.debug(`- ${request.method} ${request.url} ${request.header('X-Forwarded-For') || request.socket.remoteAddress} ${request.header('User-Agent')}`)
     if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
     if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
 
-    if (REGEXP_API.test(request.getPath())) {
-      response.header('Access-Control-Allow-Origin', '*')
-      response.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST')
-      response.header('Access-Control-Allow-Headers', 'Content-Type')
-    }
+    // if (REGEXP_API.test(request.getPath())) {
+    //   response.header('Access-Control-Allow-Origin', '*')
+    //   response.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST')
+    //   response.header('Access-Control-Allow-Headers', 'Content-Type')
+    // }
 
     return next()
 

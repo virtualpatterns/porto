@@ -1,0 +1,39 @@
+@import './reset.css';
+
+@media (min-width: 320px) {
+
+  div.p-attendance {
+    margin: 0px auto;
+    width: 320px;
+  }
+
+  header.p-meeting {
+    left: inherit;
+    margin: 0px auto;
+    width: 320px;
+  }
+
+}
+
+a.p-attendee {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a.p-attendee.p-not-attended {
+  font-weight: inherit;
+}
+
+div.p-overlay {
+  background-color: rgba(0,0,0,0);
+  height: 100%;
+  left: 0px;
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  z-index: 10;
+}
+
+div.p-overlay-hidden {
+  display: none;
+}
