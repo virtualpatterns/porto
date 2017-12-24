@@ -12,9 +12,9 @@ import Status from './routes/status'
 
 const CORS = _CORS({
   'preflightMaxAge': 5,
-  'origins': [ '*'],
-  'allowHeaders': ['X-Forwarded-For'],
-  'exposeHeaders': ['']
+  'origins': [ '*' ],
+  'allowHeaders': [ 'X-Forwarded-For' ],
+  'exposeHeaders': [ '' ]
 })
 
 // const REGEXP_API = /^\/api\/(.*)$/
@@ -91,8 +91,9 @@ Server.createServer = function({ address = Server.DEFAULT_ADDRESS, databaseUrl =
   _server.use(RESTPlugins.bodyParser({}))
   _server.use(CORS.actual)
   _server.use((request, response, next) => {
-    Log.debug(`- ${request.method} ${request.url} ${request.header('X-Forwarded-For') || request.socket.remoteAddress} ${request.header('User-Agent')}`)
-    if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
+    Log.debug(`- ${request.method} ${request.url} ${request.header('X-Forwarded-For', request.socket.remoteAddress)} ${request.header('User-Agent')}`)
+    // if (request.headers && !Is.emptyObject(request.headers)) Log.inspect('  request.headers', request.headers)
+    // if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
     if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
 
     // if (REGEXP_API.test(request.getPath())) {

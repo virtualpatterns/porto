@@ -16,6 +16,12 @@ namespace('configuration', () => {
     Jake.cpR('./source/www/configurations/anonymouse.json', './source/www/configuration.json', { 'silent': true })
   })
 
+  desc('Copy DUMBLEDORE configuration')
+  task('dumbledore', [], {}, () => {
+    Log.debug('- Copying DUMBLEDORE configuration ...')
+    Jake.cpR('./source/www/configurations/dumbledore.json', './source/www/configuration.json', { 'silent': true })
+  })
+
   desc('Copy static configuration')
   task('static', [], {}, () => {
     Log.debug('- Copying static configuration ...')
