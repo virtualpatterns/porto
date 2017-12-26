@@ -28,11 +28,6 @@
     "jake": "npm run-script build && jake --jakefile ./tasks/index.js --trace",
     "tasks": "npm run-script build && jake --jakefile ./tasks/index.js --tasks",
     "upgrade": "npm-check-updates --upgrade",
-    "run-debug": "rm -f /var/log/porto/porto.log && npm run-script bundle && node --inspect server/index.js run --databaseUrl mysql://porto:porto@localhost/porto?debug=true --logPath /var/log/porto/porto.log",
-    "test-debug": "rm -f /var/log/porto/porto.test.log && npm run-script bundle && npm run-script lint && env ADDRESS=\"0.0.0.0\" DATABASE_URL=\"mysql://porto:porto@localhost/porto?multipleStatements=true\" LOG_PATH=\"/var/log/porto/porto.test.log\" MODULES_PATH=\"./node_modules\" PORT=\"8080\" STATIC_PATH=\"./www\" mocha --bail --inspect-brk --recursive --timeout 0 ./tests",
-    "check": "depcheck --ignore-dirs=source,sandbox",
-    "get-attendance": "http GET http://localhost:8080/api/attendance",
-    "put-attendance": "http PUT http://localhost:8080/api/attendance meetingId=225 userId=71 attended:=true",
     "watch-www": "nodemon --config ./watch/www.json --on-change-only"
   },
   "version": "0.0.34",
@@ -75,6 +70,7 @@
     "npm-check-updates": "^2.13.0",
     "pm2": "^2.9.1",
     "puppeteer": "^0.13.0",
+    "selenium-webdriver": "^3.6.0",
     "webpack": "^3.10.0"
   }
 }
