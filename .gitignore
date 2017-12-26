@@ -3,6 +3,7 @@
 *.err
 *.log
 *.out
+/backups
 /coverage
 /library
 /node_modules

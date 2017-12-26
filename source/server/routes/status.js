@@ -83,6 +83,11 @@ Status.createRoutes = function (_server, databaseUrl) {
 
   })
 
+  _server.head({ 'isLogged': false, 'path': '/api/check' }, (request, response, next) => {
+    response.send(200, {})
+    return next()
+  })
+
 }
 
 Status.formatSize = function (size) {

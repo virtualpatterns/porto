@@ -96,3 +96,15 @@ describe('/api/status', () => {
   })
 
 })
+
+describe('/api/check', () => {
+
+  describe('HEAD', () => {
+
+    it('should respond with 200 OK', async () => {
+      Assert.equal((await Request.head('/api/check')).status, 200)
+    })
+
+  })
+
+})

@@ -15,6 +15,15 @@ namespace('get', () => {
 
 })
 
+namespace('head', () => {
+
+  desc('HEAD /api/check')
+  task('check', [], {}, () => {
+    Jake.exec([ 'http HEAD http://localhost:8080/api/check' ], { 'printStderr': true, 'printStdout': true }, () => complete())
+  })
+
+})
+
 namespace('options', () => {
 
   desc('OPTIONS /api/attendance')

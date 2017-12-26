@@ -17,7 +17,6 @@ const CORS = _CORS({
   'exposeHeaders': [ '' ]
 })
 
-// const REGEXP_API = /^\/api\/(.*)$/
 const STOP_TIMEOUT = 5000
 
 const serverPrototype = Object.create({})
@@ -91,16 +90,13 @@ Server.createServer = function({ address = Server.DEFAULT_ADDRESS, databaseUrl =
   _server.use(RESTPlugins.bodyParser({}))
   _server.use(CORS.actual)
   _server.use((request, response, next) => {
-    Log.debug(`- ${request.method} ${request.url} ${request.header('X-Forwarded-For', request.socket.remoteAddress)} ${request.header('User-Agent')}`)
-    // if (request.headers && !Is.emptyObject(request.headers)) Log.inspect('  request.headers', request.headers)
-    // if (request.query && !Is.emptyObject(request.query)) Log.inspect('  request.query', request.query)
-    if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
 
-    // if (REGEXP_API.test(request.getPath())) {
-    //   response.header('Access-Control-Allow-Origin', '*')
-    //   response.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST')
-    //   response.header('Access-Control-Allow-Headers', 'Content-Type')
-    // }
+    let route = request.getRoute()
+
+    if (Is.undefined(route.isLogged) || route.isLogged == true) {
+      Log.debug(`- ${request.method} ${request.url} ${request.header('X-Forwarded-For', request.socket.remoteAddress)} ${request.header('User-Agent')}`)
+      if (request.body && !Is.emptyObject(request.body)) Log.inspect('  request.body', request.body)
+    }
 
     return next()
 
